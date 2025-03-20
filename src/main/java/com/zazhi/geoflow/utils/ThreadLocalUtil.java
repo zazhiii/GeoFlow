@@ -1,6 +1,5 @@
 package com.zazhi.geoflow.utils;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,7 +14,13 @@ public class ThreadLocalUtil {
     public static <T> T get(){
         return (T) THREAD_LOCAL.get();
     }
-	
+
+    // 获取用户id
+    public static Integer getCurrentId(){
+        Map<String, Object> map = get();
+        return Integer.valueOf(map.get("id").toString());
+    }
+
     //存储键值对
     public static void set(Object value){
         THREAD_LOCAL.set(value);

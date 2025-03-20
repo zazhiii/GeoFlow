@@ -95,23 +95,22 @@ public class MinioUtil {
         if (StringUtils.isBlank(originalFilename)){
             throw new RuntimeException("文件名为空");
         }
-        String objectName = UUID.randomUUID() + originalFilename.substring(originalFilename.lastIndexOf("."));
+        String fileName = UUID.randomUUID() + originalFilename.substring(originalFilename.lastIndexOf("."));
         try {
             //文件名称相同会覆盖
             minioClient.putObject(
                     PutObjectArgs
                             .builder()
                             .bucket(prop.getBucketName())
-                            .object(objectName)
+                            .object(fileName)
                             .stream(file.getInputStream(), file.getSize(), -1)
                             .contentType(file.getContentType())
                             .build()
                     );
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException("上传失败");
         }
-        return objectName;
+        return prop.getEndpoint() + "/" + prop.getBucketName() + "/" + fileName;
     }
 
     /**
@@ -194,11 +193,16 @@ public class MinioUtil {
      */
     public boolean remove(String fileName){
         try {
-            minioClient.removeObject( RemoveObjectArgs.builder().bucket(prop.getBucketName()).object(fileName).build());
+            minioClient.removeObject(
+                    RemoveObjectArgs
+                            .builder()
+                            .bucket(prop.getBucketName())
+                            .object(fileName).build());
         }catch (Exception e){
             return false;
         }
         return true;
     }
+
 
 }

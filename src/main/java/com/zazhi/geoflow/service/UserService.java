@@ -1,6 +1,7 @@
 package com.zazhi.geoflow.service;
 
 import com.zazhi.geoflow.entity.pojo.User;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
     /**
@@ -23,4 +24,10 @@ public interface UserService {
      * @return 用户信息
      */
     User getUserInfo(Integer id);
+
+    /**
+     * 上传头像
+     * @param file 头像文件
+     */
+    void uploadAvatar(MultipartFile file);
 }

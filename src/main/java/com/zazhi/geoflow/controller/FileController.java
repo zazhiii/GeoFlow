@@ -45,14 +45,10 @@ public class FileController {
         return Result.success(minioUtil.removeBucket(bucketName));
     }
 
-    @Operation(summary = "文件上传返回url")
+    @Operation(summary = "文件上传")
     @PostMapping("/upload")
-    public Result upload(@RequestParam("file") MultipartFile file) {
-        String objectName = minioUtil.upload(file);
-        if (null != objectName) {
-            return Result.success(prop.getEndpoint() + "/" + prop.getBucketName() + "/" + objectName);
-        }
-        return Result.error("上传失败");
+    public Result<String> upload(@RequestParam("file") MultipartFile file) {
+        return Result.success(minioUtil.upload(file));
     }
 
     @Operation(summary = "图片/视频预览")

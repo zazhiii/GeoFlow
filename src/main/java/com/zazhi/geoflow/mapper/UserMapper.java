@@ -30,4 +30,11 @@ public interface UserMapper {
      */
     @Select("select * from user where id = #{id}")
     User getUserById(Integer id);
+
+    /**
+     * 更新用户
+     * @param user 用户
+     * @return 用户
+     */
+    void update(User user);
 }
