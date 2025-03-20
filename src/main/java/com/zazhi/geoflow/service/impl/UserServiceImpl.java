@@ -67,4 +67,14 @@ public class UserServiceImpl implements UserService {
                 .setExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpiration()))
                 .sign();
     }
+
+    /**
+     * 获取用户信息
+     * @param id 用户id
+     * @return 用户信息
+     */
+    @Override
+    public User getUserInfo(Integer id) {
+        return userMapper.getUserById(id);
+    }
 }

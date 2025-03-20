@@ -22,4 +22,12 @@ public interface UserMapper {
      */
     @Insert("insert into user(username, password) values(#{username}, #{password})")
     void insert(User user);
+
+    /**
+     * 根据id查询用户
+     * @param id 用户id
+     * @return 用户
+     */
+    @Select("select * from user where id = #{id}")
+    User getUserById(Integer id);
 }

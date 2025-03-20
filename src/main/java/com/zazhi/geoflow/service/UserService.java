@@ -1,5 +1,7 @@
 package com.zazhi.geoflow.service;
 
+import com.zazhi.geoflow.entity.pojo.User;
+
 public interface UserService {
     /**
      * 用户注册
@@ -14,4 +16,11 @@ public interface UserService {
      * @param password 密码
      */
     String login(String username, String password);
+
+    /**
+     * 获取用户信息
+     * @param id 用户id
+     * @return 用户信息
+     */
+    User getUserInfo(Integer id);
 }

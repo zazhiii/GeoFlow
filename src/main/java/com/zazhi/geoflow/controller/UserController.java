@@ -1,9 +1,11 @@
 package com.zazhi.geoflow.controller;
 
 import com.zazhi.geoflow.entity.pojo.Result;
+import com.zazhi.geoflow.entity.pojo.User;
 import com.zazhi.geoflow.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -39,21 +41,21 @@ public class UserController {
 
         return Result.success(userService.login(username, password));
     }
-//
+    @Operation(summary = "用户信息")
+    @GetMapping(value = "info/{id}")
+    public Result<User> info(@PathVariable("id") Integer id) {
+        log.info("用户信息");
+        return Result.success(userService.getUserInfo(id));
+    }
+
 //    @Operation(summary = "用户注销")
 //    @PostMapping(value = "logout")
 //    public Result logout() {
 //        log.info("用户注销");
 //        return Result.success();
 //    }
-//
-//    @Operation(summary = "用户信息")
-//    @GetMapping(value = "info")
-//    public Result info() {
-//        log.info("用户信息");
-//        return Result.success();
-//    }
-//
+
+
 //    @Operation(summary = "用户列表")
 //    @GetMapping(value = "list")
 //    public Result list() {

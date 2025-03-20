@@ -17,8 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
         //登录接口和注册接口放行
         registry.addInterceptor(loginInterceptor)
                 .excludePathPatterns(
-                        "api/user/login",
-                        "api/user/register",
+                        "/api/user/login",
+                        "/api/user/register",
                         // swagger 的请求
                         "/swagger-resources/**",
                         "/webjars/**",
