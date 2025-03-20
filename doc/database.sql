@@ -5,6 +5,7 @@ USE `geo_flow`;
 -- ================== 以下是创建表 ==================
 
 -- 用户表
+DROP TABLE IF EXISTS `user`;
 create table user
 (
     id              int AUTO_INCREMENT primary key comment '用户ID',
@@ -20,8 +21,9 @@ create table user
 
 
 -- 文件信息表（file）
-CREATE TABLE `file` (
-    `id` int AUTO_INCREMENT primary key COMMENT '文件唯一标识(UUID)',
+DROP TABLE IF EXISTS `geo_file`;
+CREATE TABLE `geo_file` (
+    `id` int AUTO_INCREMENT primary key COMMENT '文件ID',
     `user_id` int NOT NULL COMMENT '关联用户ID',
     `file_path` VARCHAR(500) NOT NULL COMMENT '完整存储路径',
     `file_size` BIGINT UNSIGNED NOT NULL COMMENT '文件大小(字节 Byte)',
