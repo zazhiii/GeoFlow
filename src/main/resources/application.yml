@@ -27,3 +27,9 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+
+minio:
+  endpoint: http://localhost:9000
+  bucketName: minio-demo
+  accessKey: YtDznxVyGgplz9qXl5bw
+  secretKey: K4N9YbIUHifTm5ABkMWHidp8QN8YmYn7RmlsYSBz

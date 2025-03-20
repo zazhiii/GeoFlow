@@ -23,10 +23,11 @@ import java.util.UUID;
 @Component
 @Slf4j
 public class MinioUtil {
+
     @Autowired
     private MinioConfigProperties prop;
 
-    @Resource
+    @Autowired
     private MinioClient minioClient;
 
     /**
