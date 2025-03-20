@@ -32,12 +32,13 @@ public class UserController {
         return Result.success();
     }
 
-//    @Operation(summary = "用户登录")
-//    @PostMapping(value = "login")
-//    public Result login(@RequestParam String username, @RequestParam String password) {
-//        log.info("用户登录");
-//        return Result.success();
-//    }
+    @Operation(summary = "用户登录")
+    @PostMapping(value = "login")
+    public Result<String> login(@RequestParam String username, @RequestParam String password) {
+        log.info("用户登录");
+
+        return Result.success(userService.login(username, password));
+    }
 //
 //    @Operation(summary = "用户注销")
 //    @PostMapping(value = "logout")

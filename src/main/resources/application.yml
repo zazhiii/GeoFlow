@@ -33,3 +33,7 @@ minio:
   bucketName: minio-demo
   accessKey: YtDznxVyGgplz9qXl5bw
   secretKey: K4N9YbIUHifTm5ABkMWHidp8QN8YmYn7RmlsYSBz
+
+jwt:
+  secret: zazhi
+  expiration: 1296000000
