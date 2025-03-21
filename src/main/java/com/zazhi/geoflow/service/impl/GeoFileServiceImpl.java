@@ -29,14 +29,15 @@ public class GeoFileServiceImpl implements GeoFileService {
      * @return 文件路径
      */
     @Override
-    public String upload(MultipartFile file, String description) {
+    public String upload(MultipartFile file, String fileName, String description) {
         String url = minioUtil.upload(file);
 
         GeoFile geoFile = GeoFile.builder()
                 .userId(ThreadLocalUtil.getCurrentId())
+                .fileName(fileName)
                 .filePath(url)
                 .fileSize(file.getSize())
-                .fileType(file.getContentType())
+                .fileType(url.substring(url.lastIndexOf(".")))
                 .description(description)
                 .build();
 

@@ -27,7 +27,10 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api",
                         "/api-docs",
                         "/api-docs/**",
-                        "/doc.html/**"
+                        "/doc.html/**",
+
+                        "/favicon.ico",
+                        "/error"
                 );
     }
 }

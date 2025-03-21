@@ -25,6 +25,11 @@ public class GeoFile implements Serializable {
     private Integer userId;
 
     /**
+     * 文件名
+     */
+    private String fileName;
+
+    /**
      * 完整存储路径
      */
     @JsonIgnore

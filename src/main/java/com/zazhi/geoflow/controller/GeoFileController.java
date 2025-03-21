@@ -37,11 +37,12 @@ public class GeoFileController {
     @PostMapping("/upload")
     public Result<String> upload(
             @RequestParam("file") MultipartFile file,
+            @RequestParam("fileName") String fileName,
             @PathParam("description") String description
     ) {
         log.info("文件上传");
 
-        return Result.success(fileService.upload(file, description));
+        return Result.success(fileService.upload(file, fileName, description));
     }
 
     @Operation(summary = "图片/视频预览")
