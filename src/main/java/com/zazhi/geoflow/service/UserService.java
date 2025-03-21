@@ -1,7 +1,10 @@
 package com.zazhi.geoflow.service;
 
+import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.User;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface UserService {
     /**
@@ -30,4 +33,10 @@ public interface UserService {
      * @param file 头像文件
      */
     void uploadAvatar(MultipartFile file);
+
+    /**
+     * 查询用户上传的文件
+     * @return 文件列表
+     */
+    List<GeoFile> getGeoFiles();
 }

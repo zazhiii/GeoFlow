@@ -4,6 +4,7 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.jwt.JWT;
 import com.zazhi.geoflow.config.properties.JWTProperties;
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
+import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.User;
 import com.zazhi.geoflow.mapper.UserMapper;
 import com.zazhi.geoflow.service.UserService;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -112,5 +114,15 @@ public class UserServiceImpl implements UserService {
         String url = minioUtil.upload(file);
         user.setAvatar(url);
         userMapper.update(user);
+    }
+
+    /**
+     * 查询用户上传的文件
+     *
+     * @return 文件列表
+     */
+    @Override
+    public List<GeoFile> getGeoFiles() {
+        return userMapper.getGeoFiles(ThreadLocalUtil.getCurrentId());
     }
 }

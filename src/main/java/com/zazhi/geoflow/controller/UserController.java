@@ -1,5 +1,6 @@
 package com.zazhi.geoflow.controller;
 
+import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.Result;
 import com.zazhi.geoflow.entity.pojo.User;
 import com.zazhi.geoflow.service.UserService;
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * @author zazhi
@@ -65,6 +68,15 @@ public class UserController {
         userService.uploadAvatar(file);
         return Result.success();
     }
+
+    @Operation(summary = "查询用户上传的文件")
+    @GetMapping(value = "geo_files")
+    public Result<List<GeoFile>> geoFiles() {
+        log.info("查询用户文件");
+
+        return Result.success(userService.getGeoFiles());
+    }
+
 
 //    @Operation(summary = "用户注销")
 //    @PostMapping(value = "logout")

@@ -25,10 +25,11 @@ DROP TABLE IF EXISTS `geo_file`;
 CREATE TABLE `geo_file` (
     `id` int AUTO_INCREMENT primary key COMMENT '文件ID',
     `user_id` int NOT NULL COMMENT '关联用户ID',
+    `description` TEXT COMMENT '文件描述',
+    `file_name` VARCHAR(50) NOT NULL COMMENT '文件名',
     `file_path` VARCHAR(500) NOT NULL COMMENT '完整存储路径',
     `file_size` BIGINT UNSIGNED NOT NULL COMMENT '文件大小(字节 Byte)',
     `file_type` VARCHAR(50) NOT NULL COMMENT '文件类型(MIME/扩展名)',
-    `description` TEXT COMMENT '文件描述',
     `status` varchar(50) NOT NULL DEFAULT 'uploading' COMMENT '文件状态(uploading, completed, failed)',
     `upload_task_id` VARCHAR(36) COMMENT '上传任务ID',
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',

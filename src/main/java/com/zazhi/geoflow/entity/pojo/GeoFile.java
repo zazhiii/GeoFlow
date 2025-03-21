@@ -1,5 +1,6 @@
 package com.zazhi.geoflow.entity.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class GeoFile implements Serializable {
     /**
      * 完整存储路径
      */
+    @JsonIgnore
     private String filePath;
 
     /**
