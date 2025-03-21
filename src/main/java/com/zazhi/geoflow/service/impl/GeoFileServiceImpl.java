@@ -44,4 +44,25 @@ public class GeoFileServiceImpl implements GeoFileService {
         geoFileMapper.insert(geoFile);
         return url;
     }
+
+    /**
+     * 删除文件
+     *
+     * @param id 文件id
+     */
+    @Override
+    public void delete(Integer id) {
+        GeoFile geoFile = geoFileMapper.getById(id);
+        if(geoFile == null) {
+            throw new RuntimeException("文件不存在");
+        }
+        if(!geoFile.getUserId().equals(ThreadLocalUtil.getCurrentId())) {
+            throw new RuntimeException("无权限删除");
+        }
+        String url = geoFile.getFilePath();
+        String fileName = url.substring(url.lastIndexOf("/") + 1);
+        // 删除minio文件 & 删除数据库记录
+        minioUtil.remove(fileName);
+        geoFileMapper.delete(id);
+    }
 }

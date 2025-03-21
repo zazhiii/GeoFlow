@@ -9,4 +9,10 @@ public interface GeoFileService {
      * @return 文件路径
      */
     String upload(MultipartFile file, String fileName, String description);
+
+    /**
+     * 删除文件
+     * @param id 文件id
+     */
+    void delete(Integer id);
 }

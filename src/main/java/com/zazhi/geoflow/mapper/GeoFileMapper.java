@@ -1,8 +1,10 @@
 package com.zazhi.geoflow.mapper;
 
 import com.zazhi.geoflow.entity.pojo.GeoFile;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface GeoFileMapper {
@@ -12,4 +14,19 @@ public interface GeoFileMapper {
      */
     @Insert("insert into geo_file(user_id, file_name, file_path, file_size, file_type, description) values(#{userId}, #{fileName}, #{filePath}, #{fileSize}, #{fileType}, #{description})")
     void insert(GeoFile geoFile);
+
+    /**
+     * 根据ID查询文件
+     * @param id 文件ID
+     * @return 文件
+     */
+    @Select("select * from geo_file where id = #{id}")
+    GeoFile getById(Integer id);
+
+    /**
+     * 删除文件
+     * @param id 文件ID
+     */
+    @Delete("delete from geo_file where id = #{id}")
+    void delete(Integer id);
 }

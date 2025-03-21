@@ -45,6 +45,13 @@ public class GeoFileController {
         return Result.success(fileService.upload(file, fileName, description));
     }
 
+    @Operation(summary = "删除文件")
+    @DeleteMapping("/delete")
+    public Result delete(@RequestParam("id") Integer id) {
+        fileService.delete(id);
+        return Result.success();
+    }
+
     @Operation(summary = "图片/视频预览")
     @GetMapping("/preview")
     public Result preview(@RequestParam("fileName") String fileName) {
