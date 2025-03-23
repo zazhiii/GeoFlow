@@ -2,8 +2,12 @@ package com.zazhi.geoflow.utils;
 
 import com.zazhi.geoflow.config.MinioConfig;
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
+import com.zazhi.geoflow.minio.PearlMinioClient;
 import io.micrometer.common.util.StringUtils;
 import io.minio.*;
+import io.minio.errors.InsufficientDataException;
+import io.minio.errors.InternalException;
+import io.minio.errors.XmlParserException;
 import io.minio.http.Method;
 import io.minio.messages.Bucket;
 import io.minio.messages.Item;
@@ -16,9 +20,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 @Slf4j
@@ -29,6 +37,12 @@ public class MinioUtil {
 
     @Autowired
     private MinioClient minioClient;
+
+    @Autowired
+    private MinioAsyncClient minioAsyncClient;
+
+    @Autowired
+    private PearlMinioClient pearlMinioClient;
 
     /**
      * 查看存储bucket是否存在
@@ -111,6 +125,36 @@ public class MinioUtil {
             throw new RuntimeException("上传失败");
         }
         return prop.getEndpoint() + "/" + prop.getBucketName() + "/" + fileName;
+    }
+
+    /**
+     * 指定名字文件上传
+     * @param file
+     * @param objectName
+     * @return
+     */
+    public String upload(MultipartFile file, String objectName) {
+        String originalFilename = file.getOriginalFilename();
+        if (StringUtils.isBlank(originalFilename)){
+            throw new RuntimeException("文件名为空");
+        }
+        // 加上拓展名
+        objectName += originalFilename.substring(originalFilename.lastIndexOf("."));
+        try {
+            //文件名称相同会覆盖
+            minioClient.putObject(
+                    PutObjectArgs
+                            .builder()
+                            .bucket(prop.getBucketName())
+                            .object(objectName)
+                            .stream(file.getInputStream(), file.getSize(), -1)
+                            .contentType(file.getContentType())
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("上传失败");
+        }
+        return prop.getEndpoint() + "/" + prop.getBucketName() + "/" + objectName;
     }
 
     /**

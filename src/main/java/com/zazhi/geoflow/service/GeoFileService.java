@@ -8,7 +8,7 @@ public interface GeoFileService {
      * @param file 文件
      * @return 文件路径
      */
-    String upload(MultipartFile file, String fileName, String description);
+    String upload(MultipartFile file, String objectName, String fileName, String description);
 
     /**
      * 删除文件

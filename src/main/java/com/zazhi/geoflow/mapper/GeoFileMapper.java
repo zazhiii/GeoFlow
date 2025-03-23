@@ -12,7 +12,7 @@ public interface GeoFileMapper {
      * 插入文件
      * @param geoFile 文件
      */
-    @Insert("insert into geo_file(user_id, file_name, file_path, file_size, file_type, description) values(#{userId}, #{fileName}, #{filePath}, #{fileSize}, #{fileType}, #{description})")
+    @Insert("insert into geo_file(user_id, file_name, object_name, url, file_size, file_type, description) values(#{userId}, #{fileName}, #{objectName}, #{url}, #{fileSize}, #{fileType}, #{description})")
     void insert(GeoFile geoFile);
 
     /**

@@ -38,11 +38,12 @@ public class GeoFileController {
     public Result<String> upload(
             @RequestParam("file") MultipartFile file,
             @RequestParam("fileName") String fileName,
+            @RequestParam("objectName") String objectName,
             @PathParam("description") String description
     ) {
         log.info("文件上传");
 
-        return Result.success(fileService.upload(file, fileName, description));
+        return Result.success(fileService.upload(file, objectName, fileName, description));
     }
 
     @Operation(summary = "删除文件")

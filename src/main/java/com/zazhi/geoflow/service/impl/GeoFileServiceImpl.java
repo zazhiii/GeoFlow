@@ -29,13 +29,14 @@ public class GeoFileServiceImpl implements GeoFileService {
      * @return 文件路径
      */
     @Override
-    public String upload(MultipartFile file, String fileName, String description) {
-        String url = minioUtil.upload(file);
+    public String upload(MultipartFile file, String objectName, String fileName, String description) {
+        String url = minioUtil.upload(file, objectName);
 
         GeoFile geoFile = GeoFile.builder()
                 .userId(ThreadLocalUtil.getCurrentId())
                 .fileName(fileName)
-                .filePath(url)
+                .objectName(objectName)
+                .url(url)
                 .fileSize(file.getSize())
                 .fileType(url.substring(url.lastIndexOf(".")))
                 .description(description)
@@ -59,7 +60,7 @@ public class GeoFileServiceImpl implements GeoFileService {
         if(!geoFile.getUserId().equals(ThreadLocalUtil.getCurrentId())) {
             throw new RuntimeException("无权限删除");
         }
-        String url = geoFile.getFilePath();
+        String url = geoFile.getUrl();
         String fileName = url.substring(url.lastIndexOf("/") + 1);
         // 删除minio文件 & 删除数据库记录
         minioUtil.remove(fileName);

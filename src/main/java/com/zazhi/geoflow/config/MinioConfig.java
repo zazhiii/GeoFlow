@@ -3,6 +3,7 @@ package com.zazhi.geoflow.config;
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
+import io.minio.MinioAsyncClient;
 import io.minio.MinioClient;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,15 @@ public class MinioConfig {
 
     @Autowired
     private MinioConfigProperties prop;
+
+    // 异步客户端 分片上传用到这个
+    @Bean
+    public MinioAsyncClient minioAsyncClient() {
+        return MinioAsyncClient.builder()
+                .endpoint(prop.getEndpoint())
+                .credentials(prop.getAccessKey(), prop.getSecretKey())
+                .build();
+    }
 
     @Bean
     public MinioClient minioClient() {
