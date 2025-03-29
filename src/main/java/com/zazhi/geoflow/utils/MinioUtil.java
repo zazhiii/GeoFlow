@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Component
 @Slf4j
@@ -43,6 +44,36 @@ public class MinioUtil {
 
     @Autowired
     private PearlMinioClient pearlMinioClient;
+
+    /**
+     * 判断文件是否存在
+     *
+     * @param bucketName 桶名称
+     * @param objectName 文件名称, 如果要带文件夹请用 / 分割, 例如 /help/index.html
+     * @return true存在, 反之
+     */
+    public Boolean checkFileIsExist(String bucketName, String objectName) {
+        try {
+            minioClient.statObject(
+                    StatObjectArgs.builder().bucket(bucketName).object(objectName).build()
+            );
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 创建分片上传请求
+     *
+     * @param objectName 对象名
+     * @return 上传ID
+     */
+    public String createMultipartUpload(String objectName) throws InsufficientDataException, IOException, NoSuchAlgorithmException, InvalidKeyException, XmlParserException, InternalException, ExecutionException, InterruptedException {
+        CompletableFuture<CreateMultipartUploadResponse> response = pearlMinioClient.createMultipartUploadAsync(prop.getBucketName(), null, objectName, null, null);
+        return response.get().result().uploadId();
+    }
+
 
     /**
      * 查看存储bucket是否存在
@@ -138,8 +169,8 @@ public class MinioUtil {
         if (StringUtils.isBlank(originalFilename)){
             throw new RuntimeException("文件名为空");
         }
-        // 加上拓展名
-        objectName += originalFilename.substring(originalFilename.lastIndexOf("."));
+//        // 加上拓展名
+//        objectName += originalFilename.substring(originalFilename.lastIndexOf("."));
         try {
             //文件名称相同会覆盖
             minioClient.putObject(

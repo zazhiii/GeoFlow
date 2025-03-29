@@ -33,7 +33,7 @@ public class GeoFileController {
     @Autowired
     private GeoFileService fileService;
 
-    @Operation(summary = "文件上传")
+    @Operation(summary = "文件直接上传")
     @PostMapping("/upload")
     public Result<String> upload(
             @RequestParam("file") MultipartFile file,
@@ -42,7 +42,6 @@ public class GeoFileController {
             @PathParam("description") String description
     ) {
         log.info("文件上传");
-
         return Result.success(fileService.upload(file, objectName, fileName, description));
     }
 
@@ -65,6 +64,4 @@ public class GeoFileController {
         minioUtil.download(fileName, res);
         return Result.success();
     }
-
-
 }

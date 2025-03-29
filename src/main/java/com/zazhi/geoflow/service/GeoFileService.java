@@ -15,4 +15,5 @@ public interface GeoFileService {
      * @param id 文件id
      */
     void delete(Integer id);
+
 }

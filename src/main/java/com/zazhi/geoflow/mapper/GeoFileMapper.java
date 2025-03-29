@@ -29,4 +29,12 @@ public interface GeoFileMapper {
      */
     @Delete("delete from geo_file where id = #{id}")
     void delete(Integer id);
+
+    /**
+     * 根据对象名查询文件
+     * @param objectName 对象名
+     * @return 文件
+     */
+    @Select("select * from geo_file where object_name = #{objectName}")
+    GeoFile getByObjectName(String objectName);
 }

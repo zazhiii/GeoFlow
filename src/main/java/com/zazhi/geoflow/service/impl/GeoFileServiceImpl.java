@@ -22,6 +22,7 @@ public class GeoFileServiceImpl implements GeoFileService {
 
     @Autowired
     private GeoFileMapper geoFileMapper;
+
     /**
      * 上传文件
      *
@@ -30,6 +31,10 @@ public class GeoFileServiceImpl implements GeoFileService {
      */
     @Override
     public String upload(MultipartFile file, String objectName, String fileName, String description) {
+        String originalFilename = file.getOriginalFilename();
+        // 文件名后缀
+        objectName += originalFilename.substring(originalFilename.lastIndexOf("."));
+
         String url = minioUtil.upload(file, objectName);
 
         GeoFile geoFile = GeoFile.builder()
@@ -54,10 +59,10 @@ public class GeoFileServiceImpl implements GeoFileService {
     @Override
     public void delete(Integer id) {
         GeoFile geoFile = geoFileMapper.getById(id);
-        if(geoFile == null) {
+        if (geoFile == null) {
             throw new RuntimeException("文件不存在");
         }
-        if(!geoFile.getUserId().equals(ThreadLocalUtil.getCurrentId())) {
+        if (!geoFile.getUserId().equals(ThreadLocalUtil.getCurrentId())) {
             throw new RuntimeException("无权限删除");
         }
         String url = geoFile.getUrl();

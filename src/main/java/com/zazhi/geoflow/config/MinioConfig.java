@@ -1,6 +1,7 @@
 package com.zazhi.geoflow.config;
 
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
+import com.zazhi.geoflow.minio.PearlMinioClient;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioAsyncClient;
@@ -19,11 +20,13 @@ public class MinioConfig {
 
     // 异步客户端 分片上传用到这个
     @Bean
-    public MinioAsyncClient minioAsyncClient() {
-        return MinioAsyncClient.builder()
+    public PearlMinioClient pearlMinioClient() {
+        return new PearlMinioClient(
+                MinioAsyncClient.builder()
                 .endpoint(prop.getEndpoint())
                 .credentials(prop.getAccessKey(), prop.getSecretKey())
-                .build();
+                .build()
+        );
     }
 
     @Bean
