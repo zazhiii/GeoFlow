@@ -16,4 +16,10 @@ public interface GeoFileService {
      */
     void delete(Integer id);
 
+
+    /**
+     * 裁剪tiff文件
+     * @param id 文件id
+     */
+    void cropTiff(Integer id, Integer x1, Integer y1, Integer x2, Integer y2);
 }

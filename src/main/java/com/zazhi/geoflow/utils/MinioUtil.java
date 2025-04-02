@@ -21,6 +21,7 @@ import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -266,13 +267,13 @@ public class MinioUtil {
      * @return
      * @throws Exception
      */
-    public boolean remove(String fileName){
+    public boolean remove(String objectName){
         try {
             minioClient.removeObject(
                     RemoveObjectArgs
                             .builder()
                             .bucket(prop.getBucketName())
-                            .object(fileName).build());
+                            .object(objectName).build());
         }catch (Exception e){
             return false;
         }

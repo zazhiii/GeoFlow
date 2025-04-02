@@ -111,6 +111,12 @@
 			<artifactId>gt-wms</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
+		<!-- -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<!-- 添加 repo, 告诉 maven 在哪里下载 geotools 的 jar 包-->

@@ -64,4 +64,18 @@ public class GeoFileController {
         minioUtil.download(fileName, res);
         return Result.success();
     }
+
+    @Operation(summary = "裁剪tiff文件")
+    @PostMapping("/crop-tiff")
+    public Result cropTiff(
+            Integer id,
+            Integer x1,
+            Integer y1,
+            Integer x2,
+            Integer y2
+    ) {
+        fileService.cropTiff(id, x1, y1, x2, y2);
+        return Result.success();
+    }
+
 }
