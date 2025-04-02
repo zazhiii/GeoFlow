@@ -1,12 +1,15 @@
 package com.zazhi.geoflow.service.impl;
 
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
+import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.UploadTask;
 import com.zazhi.geoflow.entity.vo.TaskInfoVO;
+import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.mapper.UploadMapper;
 import com.zazhi.geoflow.minio.PearlMinioClient;
 import com.zazhi.geoflow.service.UploadService;
 import com.zazhi.geoflow.utils.MinioUtil;
+import com.zazhi.geoflow.utils.ThreadLocalUtil;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.http.Method;
@@ -42,6 +45,9 @@ public class UploadServiceImpl implements UploadService {
 
     @Autowired
     private MinioUtil minioUtil;
+
+    @Autowired
+    private GeoFileMapper geoFileMapper;
 
     /**
      * 初始化上传任务
@@ -210,5 +216,18 @@ public class UploadServiceImpl implements UploadService {
         } catch (Exception e) {
             throw new RuntimeException("合并分片失败");
         }
+        // 保存文件信息到数据库
+        GeoFile geoFile = GeoFile.builder()
+                .userId(ThreadLocalUtil.getCurrentId())
+                .fileName(uploadTask.getFileName())
+                .objectName(uploadTask.getObjectName())
+                .url(minioConfigProp.getEndpoint() + "/" + minioConfigProp.getBucketName() + "/" + uploadTask.getObjectName())
+                .fileSize(uploadTask.getTotalSize())
+                .fileType(uploadTask.getFileName().substring(uploadTask.getFileName().lastIndexOf(".")))
+                .description(null)
+                .status(1)
+                .uploadTaskId(uploadTask.getUploadId())
+                .build();
+        geoFileMapper.insert(geoFile);
     }
 }
