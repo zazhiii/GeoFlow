@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zazhi.geoflow.mapper.GeoFileMapper">
+
+
+    <select id="page" resultType="com.zazhi.geoflow.entity.pojo.GeoFile">
+        SELECT * FROM geo_file
+        <where>
+            <if test="fileName != null"> and file_name LIKE CONCAT('%', #{fileName}, '%')</if>
+            <if test="fileType != null"> and file_type = #{fileType}</if>
+        </where>
+    </select>
+
+
+</mapper>

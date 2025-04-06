@@ -1,5 +1,7 @@
 package com.zazhi.geoflow.service;
 
+import com.zazhi.geoflow.entity.pojo.GeoFile;
+import com.zazhi.geoflow.entity.pojo.PageResult;
 import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,4 +32,14 @@ public interface GeoFileService {
      * @return 文件元数据
      */
     GeoFileMetadataVO getMetadata(Integer id);
+
+    /**
+     * 获取文件列表
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @param fileName 文件名
+     * @param fileType 文件类型
+     * @return 文件列表
+     */
+    PageResult list(Integer pageNum, Integer pageSize, String fileName, String fileType);
 }

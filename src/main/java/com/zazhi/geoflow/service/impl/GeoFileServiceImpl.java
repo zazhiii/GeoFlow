@@ -1,7 +1,10 @@
 package com.zazhi.geoflow.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
+import com.zazhi.geoflow.entity.pojo.PageResult;
 import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.service.GeoFileService;
@@ -274,5 +277,20 @@ public class GeoFileServiceImpl implements GeoFileService {
         geoFileMetadataVO.setResolutionY(resolutionY);
 
         return geoFileMetadataVO;
+    }
+
+    /**
+     * 获取文件列表
+     *
+     * @param pageNum   页码
+     * @param pageSize  每页大小
+     * @param fileName  文件名
+     * @param fileType  文件类型
+     * @return 文件列表
+     */
+    public PageResult list(Integer pageNum, Integer pageSize, String fileName, String fileType) {
+        PageHelper.startPage(pageNum, pageSize);
+        Page<GeoFile> res = geoFileMapper.page(pageNum, pageSize, fileName, fileType);
+        return new PageResult<GeoFile>(res.getTotal(), res.getResult());
     }
 }

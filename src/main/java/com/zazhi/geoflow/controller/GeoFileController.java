@@ -1,6 +1,8 @@
 package com.zazhi.geoflow.controller;
 
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
+import com.zazhi.geoflow.entity.pojo.GeoFile;
+import com.zazhi.geoflow.entity.pojo.PageResult;
 import com.zazhi.geoflow.entity.pojo.Result;
 import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
 import com.zazhi.geoflow.service.GeoFileService;
@@ -17,12 +19,12 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * @author zazhi
  * @date 2025/3/20
- * @description: TODO
+ * @description: 文件
  */
 @Slf4j
 @RestController
 @RequestMapping("api/file")
-@Tag(name = "文件", description = "文件上传下载")
+@Tag(name = "文件", description = "文件管理")
 public class GeoFileController {
 
     @Autowired
@@ -33,6 +35,17 @@ public class GeoFileController {
 
     @Autowired
     private GeoFileService fileService;
+
+    @Operation(summary = "获取文件列表")
+    @GetMapping("/list")
+    public Result<PageResult<GeoFile>> list(
+            @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "fileName", required = false) String fileName,
+            @RequestParam(value = "fileType", required = false) String fileType
+    ) {
+        return Result.success(fileService.list(pageNum, pageSize, fileName, fileType));
+    }
 
     @Operation(summary = "文件直接上传")
     @PostMapping("/upload")

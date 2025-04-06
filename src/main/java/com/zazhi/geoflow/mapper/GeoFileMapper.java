@@ -1,5 +1,6 @@
 package com.zazhi.geoflow.mapper;
 
+import com.github.pagehelper.Page;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -37,4 +38,11 @@ public interface GeoFileMapper {
      */
     @Select("select * from geo_file where object_name = #{objectName}")
     GeoFile getByObjectName(String objectName);
+
+    /**
+     * 根据用户ID查询文件
+     * @param userId 用户ID
+     * @return 文件
+     */
+    Page<GeoFile> page(Integer pageNum, Integer pageSize, String fileName, String fileType);
 }
