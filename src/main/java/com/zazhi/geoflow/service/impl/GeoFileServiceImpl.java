@@ -15,6 +15,7 @@ import io.minio.GetObjectResponse;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.errors.*;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.GridFormatFinder;
@@ -37,14 +38,15 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.io.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.UUID;
 
 /**
@@ -292,5 +294,37 @@ public class GeoFileServiceImpl implements GeoFileService {
         PageHelper.startPage(pageNum, pageSize);
         Page<GeoFile> res = geoFileMapper.page(pageNum, pageSize, fileName, fileType);
         return new PageResult<GeoFile>(res.getTotal(), res.getResult());
+    }
+
+    /**
+     * 预览文件
+     *
+     * @param id 文件id
+     */
+    @Override
+    public void previewTiff(Integer id, HttpServletResponse response) {
+        GeoFile geoFile = geoFileMapper.getById(id);
+        if (geoFile == null) {
+            throw new RuntimeException("文件不存在");
+        }
+        // 从 MinIO 读取 GeoTIFF 文件
+        GeoTiffReader reader = null;
+        GridCoverage2D coverage = null;
+        try(InputStream inputStream = minioUtil.getObject(minioProp.getBucketName(), geoFile.getObjectName())) {
+            reader = new GeoTiffReader(inputStream);
+            coverage = reader.read(null);
+        } catch (Exception e) {
+            throw new RuntimeException("读取文件失败");
+        }
+        // 渲染为图像
+        RenderedImage renderedImage = coverage.getRenderedImage();
+        // 写出为 PNG
+        response.setContentType("image/png");
+        try {
+            ImageIO.write(renderedImage, "png", response.getOutputStream());
+            response.flushBuffer(); // 确保及时发送
+        } catch (IOException e) {
+            throw new RuntimeException("写出文件失败");
+        }
     }
 }

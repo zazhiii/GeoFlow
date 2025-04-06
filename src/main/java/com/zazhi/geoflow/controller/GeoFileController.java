@@ -36,6 +36,12 @@ public class GeoFileController {
     @Autowired
     private GeoFileService fileService;
 
+    @Operation(summary = "预览 GeoTiff 文件")
+    @GetMapping(value = "preview/tiff/{id}")
+    public void previewTiff(@PathVariable("id") Integer id, HttpServletResponse response) {
+        fileService.previewTiff(id, response);
+    }
+
     @Operation(summary = "获取文件列表")
     @GetMapping("/list")
     public Result<PageResult<GeoFile>> list(

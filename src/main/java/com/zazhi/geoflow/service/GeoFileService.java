@@ -3,6 +3,7 @@ package com.zazhi.geoflow.service;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.PageResult;
 import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface GeoFileService {
@@ -42,4 +43,10 @@ public interface GeoFileService {
      * @return 文件列表
      */
     PageResult list(Integer pageNum, Integer pageSize, String fileName, String fileType);
+
+    /**
+     * 预览 GeoTiff 文件
+     * @return
+     */
+    void previewTiff(Integer id, HttpServletResponse response);
 }
