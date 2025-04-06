@@ -2,6 +2,7 @@ package com.zazhi.geoflow.service.impl;
 
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
+import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.service.GeoFileService;
 import com.zazhi.geoflow.utils.MinioUtil;
@@ -13,16 +14,20 @@ import io.minio.PutObjectArgs;
 import io.minio.errors.*;
 import lombok.extern.slf4j.Slf4j;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.io.GridFormatFinder;
 import org.geotools.coverage.processing.CoverageProcessor;
 import org.geotools.coverage.processing.EmptyIntersectionException;
 import org.geotools.data.DataSourceException;
 import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.Envelope2D;
+import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.coverage.grid.Format;
+import org.opengis.coverage.grid.GridEnvelope;
 import org.opengis.coverage.processing.OperationNotFoundException;
 import org.opengis.parameter.ParameterValueGroup;
+import org.opengis.referencing.ReferenceIdentifier;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
@@ -109,6 +114,7 @@ public class GeoFileServiceImpl implements GeoFileService {
 
     /**
      * 裁剪tiff文件
+     *
      * @param id 文件id
      * @param x1 裁剪范围左下角x坐标
      * @param y1 裁剪范围左下角y坐标
@@ -216,5 +222,57 @@ public class GeoFileServiceImpl implements GeoFileService {
 
         // 删除临时文件
         cropFile.delete();
+    }
+
+    /**
+     * 获取文件元数据
+     *
+     * @param id 文件id
+     * @return 文件元数据
+     */
+    @Override
+    public GeoFileMetadataVO getMetadata(Integer id) {
+        GeoFile geoFile = geoFileMapper.getById(id);
+        if (geoFile == null) {
+            throw new RuntimeException("文件不存在");
+        }
+        if (!geoFile.getUserId().equals(ThreadLocalUtil.getCurrentId())) {
+            throw new RuntimeException("无权限查看");
+        }
+
+        // 从minio读取文件
+        GeoTiffReader reader = null;
+        try (InputStream inputStream = minioUtil.getObject(minioProp.getBucketName(), geoFile.getObjectName())) {
+            reader = new GeoTiffReader(inputStream);
+        } catch (Exception e) {
+            throw new RuntimeException("读取文件失败");
+        }
+
+        // 获取文件元数据
+        GeoFileMetadataVO geoFileMetadataVO = new GeoFileMetadataVO();
+        // 1. 地理范围
+        GeneralEnvelope envelope = reader.getOriginalEnvelope();
+        geoFileMetadataVO.setMinX(envelope.getMinimum(0));
+        geoFileMetadataVO.setMinY(envelope.getMinimum(1));
+        geoFileMetadataVO.setMaxX(envelope.getMaximum(0));
+        geoFileMetadataVO.setMaxY(envelope.getMaximum(1));
+
+        // 2. 图像范围
+        GridEnvelope gridRange = reader.getOriginalGridRange();
+        geoFileMetadataVO.setWidth(gridRange.getSpan(0));
+        geoFileMetadataVO.setHeight(gridRange.getSpan(1));
+
+        // 3. 坐标系
+        CoordinateReferenceSystem crs = reader.getCoordinateReferenceSystem();
+        String crsName = crs.getName().toString();
+        geoFileMetadataVO.setCrs(crsName);
+
+        // 4. 分辨率
+        double resolutionX = envelope.getSpan(0) / gridRange.getSpan(0);
+        double resolutionY = envelope.getSpan(1) / gridRange.getSpan(1);
+        geoFileMetadataVO.setResolutionX(resolutionX);
+        geoFileMetadataVO.setResolutionY(resolutionY);
+
+        return geoFileMetadataVO;
     }
 }

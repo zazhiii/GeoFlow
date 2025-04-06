@@ -2,6 +2,7 @@ package com.zazhi.geoflow.controller;
 
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
 import com.zazhi.geoflow.entity.pojo.Result;
+import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
 import com.zazhi.geoflow.service.GeoFileService;
 import com.zazhi.geoflow.utils.MinioUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -76,6 +77,12 @@ public class GeoFileController {
     ) {
         fileService.cropTiff(id, x1, y1, x2, y2);
         return Result.success();
+    }
+
+    @Operation(summary = "获取元数据")
+    @GetMapping("/get-metadata")
+    public Result<GeoFileMetadataVO> getMetadata(@RequestParam("id") Integer id) {
+        return Result.success(fileService.getMetadata(id));
     }
 
 }

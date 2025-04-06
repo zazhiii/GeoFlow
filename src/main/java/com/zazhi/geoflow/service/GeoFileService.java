@@ -1,5 +1,6 @@
 package com.zazhi.geoflow.service;
 
+import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface GeoFileService {
@@ -22,4 +23,11 @@ public interface GeoFileService {
      * @param id 文件id
      */
     void cropTiff(Integer id, Integer x1, Integer y1, Integer x2, Integer y2);
+
+    /**
+     * 获取文件元数据
+     * @param id 文件id
+     * @return 文件元数据
+     */
+    GeoFileMetadataVO getMetadata(Integer id);
 }
