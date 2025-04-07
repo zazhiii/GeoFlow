@@ -11,27 +11,19 @@ import com.zazhi.geoflow.service.GeoFileService;
 import com.zazhi.geoflow.utils.MinioUtil;
 import com.zazhi.geoflow.utils.ThreadLocalUtil;
 import io.minio.GetObjectArgs;
-import io.minio.GetObjectResponse;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import io.minio.errors.*;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.io.GridFormatFinder;
 import org.geotools.coverage.processing.CoverageProcessor;
 import org.geotools.coverage.processing.EmptyIntersectionException;
-import org.geotools.data.DataSourceException;
 import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.geotools.gce.geotiff.GeoTiffReader;
-import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.opengis.coverage.grid.Format;
 import org.opengis.coverage.grid.GridEnvelope;
-import org.opengis.coverage.processing.OperationNotFoundException;
 import org.opengis.parameter.ParameterValueGroup;
-import org.opengis.referencing.ReferenceIdentifier;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
@@ -40,13 +32,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.*;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.UUID;
 
 /**
@@ -326,5 +316,79 @@ public class GeoFileServiceImpl implements GeoFileService {
         } catch (IOException e) {
             throw new RuntimeException("写出文件失败");
         }
+    }
+
+    /**
+     * 合并RGB文件
+     *
+     * @param rid 红色通道文件id
+     * @param gid 绿色通道文件id
+     * @param bid 蓝色通道文件id
+     */
+    @Override
+    public void combineRGB(Integer rid, Integer gid, Integer bid, HttpServletResponse response) {
+        GeoFile RGeoFile = geoFileMapper.getById(rid);
+        GeoFile GGeoFile = geoFileMapper.getById(gid);
+        GeoFile BGeoFile = geoFileMapper.getById(bid);
+        if (RGeoFile == null || GGeoFile == null || BGeoFile == null) {
+            throw new RuntimeException("文件不存在");
+        }
+        Integer userId = ThreadLocalUtil.getCurrentId();
+        if (!RGeoFile.getUserId().equals(userId) || !GGeoFile.getUserId().equals(userId) || !BGeoFile.getUserId().equals(userId)) {
+            throw new RuntimeException("无权限查看");
+        }
+        // 从 MinIO 读取 GeoTIFF 文件
+        RenderedImage imgR = null;
+        RenderedImage imgG = null;
+        RenderedImage imgB = null;
+        try (InputStream isR = minioUtil.getObject(minioProp.getBucketName(), RGeoFile.getObjectName());
+             InputStream isG = minioUtil.getObject(minioProp.getBucketName(), GGeoFile.getObjectName());
+             InputStream isB = minioUtil.getObject(minioProp.getBucketName(), BGeoFile.getObjectName())) {
+            GeoTiffReader Rreader = new GeoTiffReader(isR);
+            GeoTiffReader Greader = new GeoTiffReader(isG);
+            GeoTiffReader Breader = new GeoTiffReader(isB);
+            GridCoverage2D covR = Rreader.read(null);
+            GridCoverage2D covG = Greader.read(null);
+            GridCoverage2D covB = Breader.read(null);
+            imgR = covR.getRenderedImage();
+            imgG = covG.getRenderedImage();
+            imgB = covB.getRenderedImage();
+        } catch (Exception e) {
+            throw new RuntimeException("读取文件失败");
+        }
+
+        int width = imgR.getWidth();
+        int height = imgR.getHeight();
+
+        Raster rasterR = imgR.getData();
+        Raster rasterG = imgG.getData();
+        Raster rasterB = imgB.getData();
+
+        BufferedImage rgb = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int r = clamp(rasterR.getSample(x, y, 0) / 256); // 简单拉伸
+                int g = clamp(rasterG.getSample(x, y, 0) / 256);
+                int b = clamp(rasterB.getSample(x, y, 0) / 256);
+
+                int rgbVal = (r << 16) | (g << 8) | b;
+                rgb.setRGB(x, y, rgbVal);
+            }
+        }
+
+        // 设置响应头
+        response.setContentType("image/png");
+        try {
+            ImageIO.write(rgb, "png", response.getOutputStream());
+            response.flushBuffer(); // 确保及时发送
+        } catch (IOException e) {
+            throw new RuntimeException("写出文件失败");
+        }
+
+
+    }
+    private int clamp(int val) {
+        return Math.min(255, Math.max(0, val));
     }
 }

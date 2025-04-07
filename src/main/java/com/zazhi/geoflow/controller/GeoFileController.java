@@ -36,6 +36,17 @@ public class GeoFileController {
     @Autowired
     private GeoFileService fileService;
 
+    @Operation(summary = "合成波段")
+    @GetMapping("/combineRGB")
+    public void combineRGB(
+            @RequestParam("rid") Integer rid,
+            @RequestParam("gid") Integer gid,
+            @RequestParam("bid") Integer bid,
+            HttpServletResponse response
+    ){
+        fileService.combineRGB(rid, gid, bid, response);
+    }
+
     @Operation(summary = "预览 GeoTiff 文件")
     @GetMapping(value = "preview/tiff/{id}")
     public void previewTiff(@PathVariable("id") Integer id, HttpServletResponse response) {
@@ -103,5 +114,7 @@ public class GeoFileController {
     public Result<GeoFileMetadataVO> getMetadata(@RequestParam("id") Integer id) {
         return Result.success(fileService.getMetadata(id));
     }
+
+
 
 }

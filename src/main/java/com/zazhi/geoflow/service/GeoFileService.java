@@ -49,4 +49,13 @@ public interface GeoFileService {
      * @return
      */
     void previewTiff(Integer id, HttpServletResponse response);
+
+    /**
+     * 合并RGB文件
+     * @param rid
+     * @param gid
+     * @param bid
+     */
+    void combineRGB(Integer rid, Integer gid, Integer bid, HttpServletResponse response);
+
 }
