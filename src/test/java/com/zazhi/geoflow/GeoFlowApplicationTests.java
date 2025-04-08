@@ -14,13 +14,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.io.File;
 import java.io.InputStream;
 
-@SpringBootTest
+//@SpringBootTest
 class GeoFlowApplicationTests {
 
-	@Autowired
+//	@Autowired
 	MinioClient minioClient;
 
-	@Test
+//	@Test
 	void readTiffFromMinIO() throws Exception {
 		InputStream inputStream = minioClient.getObject(
 				GetObjectArgs.builder()
@@ -35,7 +35,9 @@ class GeoFlowApplicationTests {
 
 	@Test
 	void test(){
-		new File("E:\\遥感数据\\NE2_50M_SR\\crop_test.tif").delete();
+//		new File("E:\\RS_DATA\\ZIPTEST\\LC08_L1TP_129039_20210205_20210304_01_T1_B1.TIF").delete();
+		String tempDir = System.getProperty("java.io.tmpdir");
+		System.out.println(tempDir); // C:\Users\LXH15\AppData\Local\Temp\
 	}
 
 }

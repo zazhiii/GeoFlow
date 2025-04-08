@@ -1,11 +1,11 @@
 -- 创建数据库
-CREATE DATABASE IF NOT EXISTS `geo_flow`;
-USE `geo_flow`;
+CREATE DATABASE IF NOT EXISTS geo_flow;
+USE geo_flow;
 
 -- ================== 以下是创建表 ==================
 
 -- 用户表
-DROP TABLE IF EXISTS `user`;
+DROP TABLE IF EXISTS user;
 create table user
 (
     id              int AUTO_INCREMENT primary key comment '用户ID',
@@ -21,25 +21,26 @@ create table user
 
 
 -- 文件信息表（file）
-DROP TABLE IF EXISTS `geo_file`;
-CREATE TABLE `geo_file` (
-    `id` int AUTO_INCREMENT primary key COMMENT '文件ID',
-    `user_id` int NOT NULL COMMENT '关联用户ID',
-    `description` TEXT COMMENT '文件描述',
-    `file_name` VARCHAR(500) NOT NULL COMMENT '文件逻辑名',
-    `object_name` VARCHAR(500) NOT NULL COMMENT '文件实际名, 文件的md5值',
-    `url` VARCHAR(500) NOT NULL COMMENT '文件URL',
-    `file_size` BIGINT UNSIGNED NOT NULL COMMENT '文件大小(字节 Byte)',
-    `file_type` VARCHAR(50) NOT NULL COMMENT '文件类型(MIME/扩展名)',
-    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '文件状态(0: 上传中, 1: 上传完成, 2: 上传失败)',
-    `upload_task_id` VARCHAR(36) COMMENT '上传任务ID',
-    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
-    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
+DROP TABLE IF EXISTS geo_file;
+CREATE TABLE geo_file (
+    id int AUTO_INCREMENT primary key COMMENT '文件ID',
+    user_id int NOT NULL COMMENT '关联用户ID',
+    data_set_id int COMMENT '关联数据集ID',
+    description TEXT COMMENT '文件描述',
+    file_name VARCHAR(500) NOT NULL COMMENT '文件逻辑名',
+    object_name VARCHAR(500) NOT NULL COMMENT '文件实际名, 文件的md5值',
+    url VARCHAR(500) NOT NULL COMMENT '文件URL',
+    file_size BIGINT UNSIGNED NOT NULL COMMENT '文件大小(字节 Byte)',
+    file_type VARCHAR(50) NOT NULL COMMENT '文件类型(MIME/扩展名)',
+--    status TINYINT NOT NULL DEFAULT 0 COMMENT '文件状态(0: 上传中, 1: 上传完成, 2: 上传失败)',
+--    upload_task_id VARCHAR(36) COMMENT '上传任务ID',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
 ) COMMENT='文件信息表';
 
 
 -- 创建表
-DROP TABLE IF EXISTS `upload_task`;
+DROP TABLE IF EXISTS upload_task;
 create table upload_task(
     id              int auto_increment primary key,
     upload_id       varchar(255) not null comment '分片上传任务id',
@@ -50,4 +51,18 @@ create table upload_task(
     total_size      mediumtext   not null comment '文件大小（byte）',
     chunk_size      mediumtext   not null comment '每个分片大小（byte）',
     chunk_num       int          null comment '分片数量'
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
 ) comment '分片上传任务';
+
+-- 数据集表
+DROP TABLE IF EXISTS data_set;
+create table data_set(
+    id int auto_increment primary key comment '主键',
+    name varchar(50) not null comment '数据集名字',
+    user_id int not null comment '数据集所属用户ID',
+    sensor_type varchar(50) not null comment '传感器类型（卫星）',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
+)  comment '数据集';
+

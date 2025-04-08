@@ -36,6 +36,18 @@ public class GeoFileController {
     @Autowired
     private GeoFileService fileService;
 
+    @Operation(summary = "加载数据集")
+    @GetMapping("/load-dataset")
+    public Result loadDataset(
+            @RequestParam("id") Integer id,
+            @RequestParam("name") String name,
+            @RequestParam("sensorType") String sensorType
+    ) {
+        log.info("加载数据集");
+        fileService.loadDataset(id, name, sensorType);
+        return Result.success();
+    }
+
     @Operation(summary = "合成波段")
     @GetMapping("/combineRGB")
     public void combineRGB(

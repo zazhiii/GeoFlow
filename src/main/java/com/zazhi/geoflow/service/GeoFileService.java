@@ -58,4 +58,11 @@ public interface GeoFileService {
      */
     void combineRGB(Integer rid, Integer gid, Integer bid, HttpServletResponse response);
 
+    /**
+     * 加载数据集
+     * @param id
+     * @param datasetName
+     * @param sensor 传感器
+     */
+    void loadDataset(Integer id, String name, String sensorType);
 }

@@ -16,6 +16,7 @@ import java.util.Date;
 public class GeoFile implements Serializable {
     private Integer id; // 文件ID
     private Integer userId; // 用户ID
+    private Integer dataSetId; // 存储桶名
     private String fileName; // 文件逻辑名
     private String objectName; // 文件存储名
     @JsonIgnore
@@ -23,8 +24,8 @@ public class GeoFile implements Serializable {
     private Long fileSize; // 文件大小
     private String fileType; // 文件类型(拓展名)
     private String description; // 文件描述
-    private Integer status; // (0: 上传中, 1: 上传完成, 2: 上传失败)
-    private String uploadTaskId; // 上传任务ID
+//    private Integer status; // (0: 上传中, 1: 上传完成, 2: 上传失败)
+//    private String uploadTaskId; // 上传任务ID
     private Date updateTime;
     private Date createTime;
 }

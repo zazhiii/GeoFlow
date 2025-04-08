@@ -20,8 +20,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -150,6 +153,57 @@ public class MinioUtil {
         return true;
     }
 
+    /**
+     * 文件上传
+     *
+     * @param file 文件
+     * @return Boolean
+     */
+    public String upload(InputStream inputStream, long objectSize, String objectName, String contentType) {
+        try {
+            //文件名称相同会覆盖
+            minioClient.putObject(
+                    PutObjectArgs
+                            .builder()
+                            .bucket(prop.getBucketName())
+                            .object(objectName)
+                            .stream(inputStream, objectSize, -1)
+                            .contentType(contentType)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("上传失败");
+        }
+        return prop.getEndpoint() + "/" + prop.getBucketName() + "/" + objectName;
+    }
+
+    /**
+     * 文件上传
+     *
+     * @param file 文件
+     * @return Boolean
+     */
+    public String upload(File file, String objectName) {
+        String originalFilename = file.getName();
+        if (StringUtils.isBlank(originalFilename)) {
+            throw new RuntimeException("文件名为空");
+        }
+        try {
+            //文件名称相同会覆盖
+            minioClient.putObject(
+                    PutObjectArgs
+                            .builder()
+                            .bucket(prop.getBucketName())
+                            .object(objectName)
+                            .stream(new FileInputStream(file), file.length(), -1)
+                            .contentType(Files.probeContentType(file.toPath()))
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("上传失败");
+        }
+        return prop.getEndpoint() + "/" + prop.getBucketName() + "/" + objectName;
+    }
 
     /**
      * 文件上传
@@ -192,8 +246,6 @@ public class MinioUtil {
         if (StringUtils.isBlank(originalFilename)) {
             throw new RuntimeException("文件名为空");
         }
-//        // 加上拓展名
-//        objectName += originalFilename.substring(originalFilename.lastIndexOf("."));
         try {
             //文件名称相同会覆盖
             minioClient.putObject(
