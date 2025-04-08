@@ -3,6 +3,9 @@ package com.zazhi.geoflow.mapper;
 import com.zazhi.geoflow.entity.pojo.DataSet;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * @author zazhi
@@ -17,7 +20,14 @@ public interface DataSetMapper {
      *
      * @param dataSet 数据集
      */
-//    @Insert("INSERT INTO dataset (name, user_id, sensor_type) " +
-//            "VALUES (#{name}, #{userId}, #{sensorType})")
     void insert(DataSet dataSet);
+
+    /**
+     * 获取数据集列表
+     *
+     * @param currentId 当前用户ID
+     * @return 数据集列表
+     */
+    @Select("SELECT * FROM data_set WHERE user_id = #{currentId}")
+    List<DataSet> list(Integer currentId);
 }
