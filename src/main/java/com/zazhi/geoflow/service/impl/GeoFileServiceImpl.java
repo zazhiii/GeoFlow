@@ -292,7 +292,9 @@ public class GeoFileServiceImpl implements GeoFileService {
      */
     public PageResult list(Integer pageNum, Integer pageSize, String fileName, String fileType) {
         PageHelper.startPage(pageNum, pageSize);
-        Page<GeoFile> res = geoFileMapper.page(pageNum, pageSize, fileName, fileType);
+        // 获取当前用户ID
+        Integer userId = ThreadLocalUtil.getCurrentId();
+        Page<GeoFile> res = geoFileMapper.page(pageNum, pageSize, fileName, fileType, userId);
         return new PageResult<GeoFile>(res.getTotal(), res.getResult());
     }
 
@@ -401,80 +403,5 @@ public class GeoFileServiceImpl implements GeoFileService {
 
     private int clamp(int val) {
         return Math.min(255, Math.max(0, val));
-    }
-
-    @Override
-    public void loadDataset(Integer id, String name, String sensorType) {
-        GeoFile geoFile = geoFileMapper.getById(id);
-        if (geoFile == null) {
-            throw new RuntimeException("文件不存在");
-        }
-        if (!geoFile.getUserId().equals(ThreadLocalUtil.getCurrentId())) {
-            throw new RuntimeException("无权限查看");
-        }
-
-        // 创建数据集，保存数据集信息到数据库
-        DataSet dataSet = DataSet.builder()
-                .name(name)
-                .userId(ThreadLocalUtil.getCurrentId())
-                .sensorType(sensorType)
-                .build();
-        dataSetMapper.insert(dataSet);
-
-        // 加载数据集
-        String tempDir = System.getProperty("java.io.tmpdir");
-        // 从 MinIO 读取压缩文件
-        try (
-                InputStream is = minioUtil.getObject(minioProp.getBucketName(), geoFile.getObjectName());
-                GZIPInputStream gis = new GZIPInputStream(is);
-                TarArchiveInputStream tis = new TarArchiveInputStream(gis)
-        ) {
-            // 解压缩文件到临时目录
-            TarArchiveEntry entry;
-            while ((entry = tis.getNextTarEntry()) != null) {
-                File outputFile = new File(tempDir, entry.getName());
-                if (entry.isDirectory()) { // 如果是文件夹，则创建文件夹
-                    outputFile.mkdirs();
-                } else {
-                    outputFile.getParentFile().mkdirs(); // 创建上级目录, 确保其父目录存在
-                    try (OutputStream os = new FileOutputStream(outputFile)) {
-                        byte[] buffer = new byte[4096];
-                        int len;
-                        while ((len = tis.read(buffer)) != -1) {
-                            os.write(buffer, 0, len);
-                        }
-                    }
-                }
-
-                // 上传文件到 MinIO
-                String outputFileName = outputFile.getName();
-                String suffix = outputFileName.substring(outputFileName.lastIndexOf(".") + 1);
-                String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                String objectName = currentDate + "/" + UUID.randomUUID() + "." + suffix;
-
-                String url = null;
-                try(InputStream outputIs = new FileInputStream(outputFile)){
-                     url = minioUtil.upload(outputIs, outputFile.length(), objectName, Files.probeContentType(outputFile.toPath()));
-                }
-
-                // 保存文件记录到数据库
-                GeoFile outputGeoFile = GeoFile.builder()
-                        .userId(ThreadLocalUtil.getCurrentId())
-                        .dataSetId(dataSet.getId()) // 关联数据集ID
-                        .fileName(outputFile.getName())
-                        .objectName(objectName)
-                        .url(url)
-                        .fileSize(outputFile.length())
-                        .fileType(suffix)
-                        .build();
-                // 关联文件与数据集,
-                geoFileMapper.insert(outputGeoFile);
-
-                // 删除临时文件
-                outputFile.delete();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("加载数据集失败");
-        }
     }
 }

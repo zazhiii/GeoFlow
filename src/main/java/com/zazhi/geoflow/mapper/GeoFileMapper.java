@@ -44,5 +44,5 @@ public interface GeoFileMapper {
      * @param userId 用户ID
      * @return 文件
      */
-    Page<GeoFile> page(Integer pageNum, Integer pageSize, String fileName, String fileType);
+    Page<GeoFile> page(Integer pageNum, Integer pageSize, String fileName, String fileType, Integer userId);
 }

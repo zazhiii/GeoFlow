@@ -10,6 +10,7 @@
         <where>
             <if test="fileName != null"> and file_name LIKE CONCAT('%', #{fileName}, '%')</if>
             <if test="fileType != null"> and file_type = #{fileType}</if>
+            and user_id = #{userId}
         </where>
     </select>
 

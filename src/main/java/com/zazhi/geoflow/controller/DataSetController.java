@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -32,5 +33,17 @@ public class DataSetController {
     public Result<List<DataSet>> list() {
         log.info("数据集列表");
         return Result.success(dataSetService.list());
+    }
+
+    @Operation(summary = "加载数据集")
+    @GetMapping("/load-dataset")
+    public Result loadDataset(
+            @RequestParam("id") Integer id,
+            @RequestParam("name") String name,
+            @RequestParam("sensorType") String sensorType
+    ) {
+        log.info("加载数据集");
+        dataSetService.loadDataset(id, name, sensorType);
+        return Result.success();
     }
 }
