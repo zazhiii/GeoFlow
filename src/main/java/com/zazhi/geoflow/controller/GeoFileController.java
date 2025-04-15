@@ -36,16 +36,6 @@ public class GeoFileController {
     @Autowired
     private GeoFileService fileService;
 
-    @Operation(summary = "合成波段")
-    @GetMapping("/combineRGB")
-    public void combineRGB(
-            @RequestParam("rid") Integer rid,
-            @RequestParam("gid") Integer gid,
-            @RequestParam("bid") Integer bid,
-            HttpServletResponse response
-    ){
-        fileService.combineRGB(rid, gid, bid, response);
-    }
 
     @Operation(summary = "预览 GeoTiff 文件")
     @GetMapping(value = "preview/tiff/{id}")
@@ -93,19 +83,6 @@ public class GeoFileController {
     @GetMapping("/download")
     public Result download(@RequestParam("fileName") String fileName, HttpServletResponse res) {
         minioUtil.download(fileName, res);
-        return Result.success();
-    }
-
-    @Operation(summary = "裁剪tiff文件")
-    @PostMapping("/crop-tiff")
-    public Result cropTiff(
-            Integer id,
-            Integer x1,
-            Integer y1,
-            Integer x2,
-            Integer y2
-    ) {
-        fileService.cropTiff(id, x1, y1, x2, y2);
         return Result.success();
     }
 

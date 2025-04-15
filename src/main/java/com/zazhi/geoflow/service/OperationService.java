@@ -13,4 +13,19 @@ public interface OperationService {
      * @return
      */
     void getNDVI(Integer redBandId, Integer nirBandId, HttpServletResponse response);
+
+    /**
+     * 合成RGB
+     * @param redBondId
+     * @param greenBondId
+     * @param blueBondId
+     * @param response
+     */
+    void combineRGB(Integer redBondId, Integer greenBondId, Integer blueBondId, HttpServletResponse response);
+
+    /**
+     * 裁剪tiff文件
+     * @param id 文件id
+     */
+    void cropTiff(Integer id, Integer x1, Integer y1, Integer x2, Integer y2);
 }

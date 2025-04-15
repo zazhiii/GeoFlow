@@ -20,13 +20,6 @@ public interface GeoFileService {
      */
     void delete(Integer id);
 
-
-    /**
-     * 裁剪tiff文件
-     * @param id 文件id
-     */
-    void cropTiff(Integer id, Integer x1, Integer y1, Integer x2, Integer y2);
-
     /**
      * 获取文件元数据
      * @param id 文件id
@@ -49,13 +42,4 @@ public interface GeoFileService {
      * @return
      */
     void previewTiff(Integer id, HttpServletResponse response);
-
-    /**
-     * 合并RGB文件
-     * @param rid
-     * @param gid
-     * @param bid
-     */
-    void combineRGB(Integer rid, Integer gid, Integer bid, HttpServletResponse response);
-
 }

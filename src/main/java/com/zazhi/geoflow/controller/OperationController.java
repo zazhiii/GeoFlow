@@ -7,9 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author zazhi
@@ -23,6 +21,30 @@ import org.springframework.web.bind.annotation.RestController;
 public class OperationController {
 
     private final OperationService operationService;
+
+    @Operation(summary = "裁剪tiff文件")
+    @PostMapping("/crop-tiff")
+    public Result cropTiff(
+            Integer id,
+            Integer x1,
+            Integer y1,
+            Integer x2,
+            Integer y2
+    ) {
+        operationService.cropTiff(id, x1, y1, x2, y2);
+        return Result.success();
+    }
+
+    @Operation(summary = "彩色合成")
+    @GetMapping("/combineRGB")
+    public void combineRGB(
+            @RequestParam("redBondId") Integer redBondId,
+            @RequestParam("greenBondId") Integer greenBondId,
+            @RequestParam("blueBondId") Integer blueBondId,
+            HttpServletResponse response
+    ){
+        operationService.combineRGB(redBondId, greenBondId, blueBondId, response);
+    }
 
     @GetMapping("/ndvi")
     @Operation(summary = "获取NDVI", description = "获取NDVI")
