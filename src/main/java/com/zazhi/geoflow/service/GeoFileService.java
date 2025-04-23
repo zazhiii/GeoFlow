@@ -6,6 +6,8 @@ import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
+
 public interface GeoFileService {
     /**
      * 上传文件
@@ -42,4 +44,13 @@ public interface GeoFileService {
      * @return
      */
     void previewTiff(Integer id, HttpServletResponse response);
+
+    /**
+     * 计算直方图
+     * @param id 文件id
+     * @param band 波段
+     * @param binSize 按区间分桶bin, bin大小，如256
+     * @return
+     */
+    Map<Integer, Long> computeHistogram(Integer id, Integer band, Integer binSize);
 }

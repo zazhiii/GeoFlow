@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
+
 /**
  * @author zazhi
  * @date 2025/3/20
@@ -34,13 +36,13 @@ public class GeoFileController {
     private MinioConfigProperties prop;
 
     @Autowired
-    private GeoFileService fileService;
+    private GeoFileService geoFileService;
 
 
     @Operation(summary = "预览 GeoTiff 文件")
     @GetMapping(value = "preview/tiff/{id}")
     public void previewTiff(@PathVariable("id") Integer id, HttpServletResponse response) {
-        fileService.previewTiff(id, response);
+        geoFileService.previewTiff(id, response);
     }
 
     @Operation(summary = "获取文件列表")
@@ -51,7 +53,7 @@ public class GeoFileController {
             @RequestParam(value = "fileName", required = false) String fileName,
             @RequestParam(value = "fileType", required = false) String fileType
     ) {
-        return Result.success(fileService.list(pageNum, pageSize, fileName, fileType));
+        return Result.success(geoFileService.list(pageNum, pageSize, fileName, fileType));
     }
 
     @Operation(summary = "文件直接上传")
@@ -63,13 +65,13 @@ public class GeoFileController {
             @PathParam("description") String description
     ) {
         log.info("文件上传");
-        return Result.success(fileService.upload(file, objectName, fileName, description));
+        return Result.success(geoFileService.upload(file, objectName, fileName, description));
     }
 
     @Operation(summary = "删除文件")
     @DeleteMapping("/delete")
     public Result delete(@RequestParam("id") Integer id) {
-        fileService.delete(id);
+        geoFileService.delete(id);
         return Result.success();
     }
 
@@ -89,7 +91,16 @@ public class GeoFileController {
     @Operation(summary = "获取元数据")
     @GetMapping("/get-metadata")
     public Result<GeoFileMetadataVO> getMetadata(@RequestParam("id") Integer id) {
-        return Result.success(fileService.getMetadata(id));
+        return Result.success(geoFileService.getMetadata(id));
+    }
+
+    @Operation(summary = "计算直方图")
+    @GetMapping("/compute-histogram")
+    public Result<Map<Integer, Long>> computeHistogram(
+            Integer id,
+            @RequestParam(required = false, defaultValue = "0")Integer band,
+            @RequestParam(required = false, defaultValue = "1") Integer binSize) {
+        return Result.success(geoFileService.computeHistogram(id, band, binSize));
     }
 
 

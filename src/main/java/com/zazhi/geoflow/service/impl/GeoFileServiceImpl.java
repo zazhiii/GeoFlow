@@ -10,12 +10,14 @@ import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
 import com.zazhi.geoflow.mapper.DataSetMapper;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.service.GeoFileService;
+import com.zazhi.geoflow.utils.ImageUtil;
 import com.zazhi.geoflow.utils.MinioUtil;
 import com.zazhi.geoflow.utils.ThreadLocalUtil;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -38,10 +40,13 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
+import java.awt.image.SampleModel;
 import java.io.*;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
@@ -54,6 +59,7 @@ import java.util.zip.ZipInputStream;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GeoFileServiceImpl implements GeoFileService {
 
     @Autowired
@@ -70,6 +76,8 @@ public class GeoFileServiceImpl implements GeoFileService {
 
     @Autowired
     private DataSetMapper dataSetMapper;
+
+    private final ImageUtil imageUtil;
 
     /**
      * 上传文件
@@ -219,5 +227,44 @@ public class GeoFileServiceImpl implements GeoFileService {
         } catch (IOException e) {
             throw new RuntimeException("写出文件失败");
         }
+    }
+
+    /**
+     * 计算直方图
+     * @param id 文件id
+     * @param band 波段
+     * @param binSize 按区间分桶bin, bin大小，如256
+     * @return
+     */
+    @Override
+    public Map<Integer, Long> computeHistogram(Integer id, Integer band, Integer binSize) {
+        GeoFile geoFile = checkFile(id);
+
+        RenderedImage renderedImg = imageUtil.getRenderedImg(minioProp.getBucketName(), geoFile.getObjectName());
+
+        Raster raster = renderedImg.getData();
+        int width = raster.getWidth();
+        int height = raster.getHeight();
+
+        Map<Integer, Long> histogram = new HashMap<>();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int value = raster.getSample(x, y, band); // 取第一个波段
+                int key = value - value % binSize;
+                histogram.put(key, histogram.getOrDefault(key, 0L) + 1);
+            }
+        }
+        return histogram;
+    }
+
+    private GeoFile checkFile(Integer id) {
+        GeoFile geoFile = geoFileMapper.getById(id);
+        if (geoFile == null) {
+            throw new RuntimeException("文件不存在");
+        }
+        if (!geoFile.getUserId().equals(ThreadLocalUtil.getCurrentId())) {
+            throw new RuntimeException("无权限查看");
+        }
+        return geoFile;
     }
 }
