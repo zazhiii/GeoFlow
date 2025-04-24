@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:9.0.1
+    container_name: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: geoflow
+      MYSQL_USER: user
+      MYSQL_PASSWORD: 123456
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - geoflow_net
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9090:9090"  # 控制台界面
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9090"
+    volumes:
+      - minio-data:/data
+    networks:
+      - geoflow_net
+
+  geoflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: geoflow
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - minio
+    networks:
+      - geoflow_net
+
+volumes:
+  mysql-data:
+  minio-data:
+
+networks:
+  geoflow_net:

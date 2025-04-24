@@ -50,7 +50,7 @@ create table upload_task(
     object_name     varchar(500) not null comment '对象名称，minio中文件实际名称（e.g. abcxxx.png）',
     total_size      mediumtext   not null comment '文件大小（byte）',
     chunk_size      mediumtext   not null comment '每个分片大小（byte）',
-    chunk_num       int          null comment '分片数量'
+    chunk_num       int          null comment '分片数量',
     update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
     create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
 ) comment '分片上传任务';
