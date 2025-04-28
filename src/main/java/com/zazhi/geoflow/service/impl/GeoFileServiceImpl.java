@@ -10,6 +10,7 @@ import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
 import com.zazhi.geoflow.mapper.DataSetMapper;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.service.GeoFileService;
+import com.zazhi.geoflow.utils.GeoFileUtil;
 import com.zazhi.geoflow.utils.ImageUtil;
 import com.zazhi.geoflow.utils.MinioUtil;
 import com.zazhi.geoflow.utils.ThreadLocalUtil;
@@ -62,22 +63,19 @@ import java.util.zip.ZipInputStream;
 @RequiredArgsConstructor
 public class GeoFileServiceImpl implements GeoFileService {
 
-    @Autowired
-    private MinioUtil minioUtil;
+    private final MinioUtil minioUtil;
 
-    @Autowired
-    private GeoFileMapper geoFileMapper;
+    private final GeoFileMapper geoFileMapper;
 
-    @Autowired
-    private MinioClient minioClient;
+    private final MinioClient minioClient;
 
-    @Autowired
-    private MinioConfigProperties minioProp;
+    private final MinioConfigProperties minioProp;
 
-    @Autowired
-    private DataSetMapper dataSetMapper;
+    private final DataSetMapper dataSetMapper;
 
     private final ImageUtil imageUtil;
+
+    private final GeoFileUtil geoFileUtil;
 
     /**
      * 上传文件
@@ -114,13 +112,7 @@ public class GeoFileServiceImpl implements GeoFileService {
      */
     @Override
     public void delete(Integer id) {
-        GeoFile geoFile = geoFileMapper.getById(id);
-        if (geoFile == null) {
-            throw new RuntimeException("文件不存在");
-        }
-        if (!geoFile.getUserId().equals(ThreadLocalUtil.getCurrentId())) {
-            throw new RuntimeException("无权限删除");
-        }
+        GeoFile geoFile = geoFileUtil.checkFile(id);
         // 删除minio文件 & 删除数据库记录
         minioUtil.remove(geoFile.getObjectName());
         geoFileMapper.delete(id);
@@ -136,13 +128,7 @@ public class GeoFileServiceImpl implements GeoFileService {
      */
     @Override
     public GeoFileMetadataVO getMetadata(Integer id) {
-        GeoFile geoFile = geoFileMapper.getById(id);
-        if (geoFile == null) {
-            throw new RuntimeException("文件不存在");
-        }
-        if (!geoFile.getUserId().equals(ThreadLocalUtil.getCurrentId())) {
-            throw new RuntimeException("无权限查看");
-        }
+        GeoFile geoFile = geoFileUtil.checkFile(id);
 
         // 从minio读取文件
         GeoTiffReader reader = null;
@@ -204,10 +190,8 @@ public class GeoFileServiceImpl implements GeoFileService {
      */
     @Override
     public void previewTiff(Integer id, HttpServletResponse response) {
-        GeoFile geoFile = geoFileMapper.getById(id);
-        if (geoFile == null) {
-            throw new RuntimeException("文件不存在");
-        }
+        GeoFile geoFile = geoFileUtil.checkFile(id);
+
         // 从 MinIO 读取 GeoTIFF 文件
         GeoTiffReader reader = null;
         GridCoverage2D coverage = null;
@@ -238,7 +222,7 @@ public class GeoFileServiceImpl implements GeoFileService {
      */
     @Override
     public Map<Integer, Long> computeHistogram(Integer id, Integer band, Integer binSize) {
-        GeoFile geoFile = checkFile(id);
+        GeoFile geoFile = geoFileUtil.checkFile(id);
 
         RenderedImage renderedImg = imageUtil.getRenderedImg(minioProp.getBucketName(), geoFile.getObjectName());
 
@@ -255,16 +239,5 @@ public class GeoFileServiceImpl implements GeoFileService {
             }
         }
         return histogram;
-    }
-
-    private GeoFile checkFile(Integer id) {
-        GeoFile geoFile = geoFileMapper.getById(id);
-        if (geoFile == null) {
-            throw new RuntimeException("文件不存在");
-        }
-        if (!geoFile.getUserId().equals(ThreadLocalUtil.getCurrentId())) {
-            throw new RuntimeException("无权限查看");
-        }
-        return geoFile;
     }
 }

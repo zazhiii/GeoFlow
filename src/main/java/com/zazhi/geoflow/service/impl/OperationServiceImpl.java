@@ -4,6 +4,7 @@ import com.zazhi.geoflow.config.properties.MinioConfigProperties;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.service.OperationService;
+import com.zazhi.geoflow.utils.GeoFileUtil;
 import com.zazhi.geoflow.utils.ImageUtil;
 import com.zazhi.geoflow.utils.MinioUtil;
 import com.zazhi.geoflow.utils.ThreadLocalUtil;
@@ -60,6 +61,8 @@ public class OperationServiceImpl implements OperationService {
 
     private final MinioConfigProperties minioProp;
 
+    private final GeoFileUtil geoFileUtil;
+
     /**
      * 获取NDVI
      * * @param redBand 红色波段
@@ -71,15 +74,8 @@ public class OperationServiceImpl implements OperationService {
     @Override
     @Operation(summary = "获取NDVI", description = "获取NDVI")
     public void getNDVI(Integer redBandId, Integer nirBandId, HttpServletResponse response) {
-        GeoFile redBandFile = geoFileMapper.getById(redBandId);
-        GeoFile nirBandFile = geoFileMapper.getById(nirBandId);
-        if (redBandFile == null || nirBandFile == null) {
-            throw new IllegalArgumentException("红色波段或近红外波段不存在");
-        }
-        Integer userId = ThreadLocalUtil.getCurrentId();
-        if(redBandFile.getUserId() != userId || nirBandFile.getUserId() != userId) {
-            throw new IllegalArgumentException("没有权限访问该文件");
-        }
+        GeoFile redBandFile = geoFileUtil.checkFile(redBandId);
+        GeoFile nirBandFile = geoFileUtil.checkFile(nirBandId);
 
         RenderedImage redRenderedImg = imageUtil.getRenderedImg(minioProp.getBucketName(), redBandFile.getObjectName());
         RenderedImage nirRenderedImg = imageUtil.getRenderedImg(minioProp.getBucketName(), nirBandFile.getObjectName());
@@ -121,16 +117,9 @@ public class OperationServiceImpl implements OperationService {
      */
     @Override
     public void combineRGB(Integer redBondId, Integer greenBondId, Integer blueBondId, HttpServletResponse response) {
-        GeoFile RGeoFile = geoFileMapper.getById(redBondId);
-        GeoFile GGeoFile = geoFileMapper.getById(greenBondId);
-        GeoFile BGeoFile = geoFileMapper.getById(blueBondId);
-        if (RGeoFile == null || GGeoFile == null || BGeoFile == null) {
-            throw new RuntimeException("文件不存在");
-        }
-        Integer userId = ThreadLocalUtil.getCurrentId();
-        if (!RGeoFile.getUserId().equals(userId) || !GGeoFile.getUserId().equals(userId) || !BGeoFile.getUserId().equals(userId)) {
-            throw new RuntimeException("无权限查看");
-        }
+        GeoFile RGeoFile = geoFileUtil.checkFile(redBondId);
+        GeoFile GGeoFile = geoFileUtil.checkFile(greenBondId);
+        GeoFile BGeoFile = geoFileUtil.checkFile(blueBondId);
 
         String bucketName = minioProp.getBucketName();
         // 从 MinIO 读取 GeoTIFF 文件
@@ -178,10 +167,7 @@ public class OperationServiceImpl implements OperationService {
      */
     @Override
     public void cropTiff(Integer id, Integer x1, Integer y1, Integer x2, Integer y2) {
-        GeoFile geoFile = geoFileMapper.getById(id);
-        if (geoFile == null) {
-            throw new RuntimeException("文件不存在");
-        }
+        GeoFile geoFile = geoFileUtil.checkFile(id);
         // TODO 文件类型校验
 
         // 从minio读取文件
