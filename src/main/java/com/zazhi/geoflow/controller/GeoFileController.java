@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("api/file")
+@RequestMapping("api/geo-file")
 @Tag(name = "文件", description = "文件管理")
 public class GeoFileController {
 

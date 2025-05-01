@@ -4,7 +4,7 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://mysql:3306/geo_flow
+    url: jdbc:mysql://mysql:3306/geo_flow?serverTimezone=Asia/Shanghai
     username: root
     password: 123456
 

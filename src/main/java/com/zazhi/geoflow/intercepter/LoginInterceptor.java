@@ -22,10 +22,15 @@ public class LoginInterceptor implements HandlerInterceptor {
         //令牌验证
         String token = request.getHeader("Authorization");
 
-//        System.out.println(request.getRequestURI());
-
-        JWT jwt = JWT.of(token).setKey(jwtProp.getSecret().getBytes());
-        Boolean validate = jwt.validate(0);
+        JWT jwt = null;
+        Boolean validate = null;
+        try {
+            jwt = JWT.of(token).setKey(jwtProp.getSecret().getBytes());
+            validate = jwt.validate(0);
+        } catch (Exception e) {
+            response.setStatus(401);
+            return false;
+        }
 
         if (!validate) {
             response.setStatus(401);

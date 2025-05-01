@@ -1,5 +1,6 @@
 package com.zazhi.geoflow.entity.pojo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,5 +28,6 @@ public class GeoFile implements Serializable {
 //    private Integer status; // (0: 上传中, 1: 上传完成, 2: 上传失败)
 //    private String uploadTaskId; // 上传任务ID
     private Date updateTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 }
