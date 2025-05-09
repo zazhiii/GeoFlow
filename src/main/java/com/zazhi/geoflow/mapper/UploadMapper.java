@@ -1,6 +1,7 @@
 package com.zazhi.geoflow.mapper;
 
 import com.zazhi.geoflow.entity.pojo.UploadTask;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -23,4 +24,11 @@ public interface UploadMapper {
      */
     @Select("select * from upload_task where file_identifier = #{identifier}")
     UploadTask getByIdentifier(String identifier);
+
+    /**
+     * 删除上传任务
+     * @param uploadTaskId
+     */
+    @Delete("delete from upload_task where id = #{uploadTaskId}")
+    void deleteUploadTask(Integer uploadTaskId);
 }

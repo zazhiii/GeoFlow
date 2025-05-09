@@ -27,7 +27,7 @@ public class GeoFile implements Serializable {
     private FileType fileType; // 文件类型(拓展名)
     private String description; // 文件描述
 //    private Integer status; // (0: 上传中, 1: 上传完成, 2: 上传失败)
-//    private String uploadTaskId; // 上传任务ID
+    private Integer uploadTaskId; // 上传主键ID
     private Date updateTime;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;

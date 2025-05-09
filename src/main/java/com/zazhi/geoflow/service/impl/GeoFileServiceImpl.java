@@ -9,6 +9,7 @@ import com.zazhi.geoflow.entity.pojo.PageResult;
 import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
 import com.zazhi.geoflow.mapper.DataSetMapper;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
+import com.zazhi.geoflow.mapper.UploadMapper;
 import com.zazhi.geoflow.service.GeoFileService;
 import com.zazhi.geoflow.utils.GeoFileUtil;
 import com.zazhi.geoflow.utils.ImageUtil;
@@ -78,6 +79,8 @@ public class GeoFileServiceImpl implements GeoFileService {
 
     private final GeoFileUtil geoFileUtil;
 
+    private final UploadMapper uploadMapper;
+
     /**
      * 上传文件
      *
@@ -114,9 +117,10 @@ public class GeoFileServiceImpl implements GeoFileService {
     @Override
     public void delete(Integer id) {
         GeoFile geoFile = geoFileUtil.checkFile(id);
-        // 删除minio文件 & 删除数据库记录
+        // 删除minio文件 & 删除数据库记录 & 删除上传任务
         minioUtil.remove(geoFile.getObjectName());
         geoFileMapper.delete(id);
+        uploadMapper.deleteUploadTask(geoFile.getUploadTaskId());
     }
 
 

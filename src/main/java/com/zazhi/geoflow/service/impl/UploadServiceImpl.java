@@ -231,7 +231,7 @@ public class UploadServiceImpl implements UploadService {
                 .fileType(FileType.fromValue(extension))
                 .description(null)
 //                .status(1)
-//                .uploadTaskId(uploadTask.getUploadId())
+                .uploadTaskId(uploadTask.getId())
                 .build();
         geoFileMapper.insert(geoFile);
     }

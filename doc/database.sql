@@ -33,7 +33,7 @@ CREATE TABLE geo_file (
     file_size BIGINT UNSIGNED NOT NULL COMMENT '文件大小(字节 Byte)',
     file_type VARCHAR(50) NOT NULL COMMENT '文件类型(MIME/扩展名)',
 --    status TINYINT NOT NULL DEFAULT 0 COMMENT '文件状态(0: 上传中, 1: 上传完成, 2: 上传失败)',
---    upload_task_id VARCHAR(36) COMMENT '上传任务ID',
+    upload_task_id INT COMMENT '上传任务主键ID',
     update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
     create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
 ) COMMENT='文件信息表';
