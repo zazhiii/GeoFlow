@@ -2,6 +2,7 @@ package com.zazhi.geoflow.service.impl;
 
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
+import com.zazhi.geoflow.enums.FileType;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.service.OperationService;
 import com.zazhi.geoflow.utils.GeoFileUtil;
@@ -213,10 +214,10 @@ public class OperationServiceImpl implements OperationService {
             throw new RuntimeException("生成裁剪文件失败");
         }
 
-        // 上传裁剪后的文件 构造 objectName: date/uuid.suffix
-        String suffix = target_file_name.substring(target_file_name.lastIndexOf(".") + 1);
+        // 上传裁剪后的文件 构造 objectName: date/uuid.extension
+        String extension = target_file_name.substring(target_file_name.lastIndexOf(".") + 1);
         String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String objectName = currentDate + "/" + UUID.randomUUID() + "." + suffix;
+        String objectName = currentDate + "/" + UUID.randomUUID() + "." + extension;
 
         // 上传到 MinIO
         String url = minioUtil.upload(cropFile, objectName);
@@ -228,7 +229,7 @@ public class OperationServiceImpl implements OperationService {
                 .objectName(objectName)
                 .url(url)
                 .fileSize(cropFile.length())
-                .fileType(suffix)
+                .fileType(FileType.fromValue(extension))
                 .build();
         geoFileMapper.insert(cropGeoFile);
         // 删除临时文件

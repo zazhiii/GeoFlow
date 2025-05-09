@@ -3,6 +3,7 @@ package com.zazhi.geoflow.service.impl;
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
 import com.zazhi.geoflow.entity.pojo.DataSet;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
+import com.zazhi.geoflow.enums.FileType;
 import com.zazhi.geoflow.mapper.DataSetMapper;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.service.DataSetService;
@@ -99,9 +100,9 @@ public class DataSetServiceImpl implements DataSetService {
 
                 // 上传文件到 MinIO
                 String outputFileName = outputFile.getName();
-                String suffix = outputFileName.substring(outputFileName.lastIndexOf(".") + 1);
+                String extension = outputFileName.substring(outputFileName.lastIndexOf(".") + 1);
                 String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                String objectName = currentDate + "/" + UUID.randomUUID() + "." + suffix;
+                String objectName = currentDate + "/" + UUID.randomUUID() + "." + extension;
 
                 String url = null;
                 try(InputStream outputIs = new FileInputStream(outputFile)){
@@ -116,7 +117,7 @@ public class DataSetServiceImpl implements DataSetService {
                         .objectName(objectName)
                         .url(url)
                         .fileSize(outputFile.length())
-                        .fileType(suffix)
+                        .fileType(FileType.valueOf(extension))
                         .build();
                 // 关联文件与数据集,
                 geoFileMapper.insert(outputGeoFile);

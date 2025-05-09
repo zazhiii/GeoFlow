@@ -4,6 +4,7 @@ import com.zazhi.geoflow.config.properties.MinioConfigProperties;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.UploadTask;
 import com.zazhi.geoflow.entity.vo.TaskInfoVO;
+import com.zazhi.geoflow.enums.FileType;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.mapper.UploadMapper;
 import com.zazhi.geoflow.minio.PearlMinioClient;
@@ -216,14 +217,18 @@ public class UploadServiceImpl implements UploadService {
         } catch (Exception e) {
             throw new RuntimeException("合并分片失败");
         }
+
+
         // 保存文件信息到数据库
+        String url = minioConfigProp.getEndpoint() + "/" + minioConfigProp.getBucketName() + "/" + uploadTask.getObjectName();
+        String extension = uploadTask.getFileName().substring(uploadTask.getFileName().lastIndexOf(".") + 1);
         GeoFile geoFile = GeoFile.builder()
                 .userId(ThreadLocalUtil.getCurrentId())
                 .fileName(uploadTask.getFileName())
                 .objectName(uploadTask.getObjectName())
-                .url(minioConfigProp.getEndpoint() + "/" + minioConfigProp.getBucketName() + "/" + uploadTask.getObjectName())
+                .url(url)
                 .fileSize(uploadTask.getTotalSize())
-                .fileType(uploadTask.getFileName().substring(uploadTask.getFileName().lastIndexOf(".")))
+                .fileType(FileType.fromValue(extension))
                 .description(null)
 //                .status(1)
 //                .uploadTaskId(uploadTask.getUploadId())

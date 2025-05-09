@@ -1,6 +1,3 @@
-SET GLOBAL time_zone = '+8:00';
-SET time_zone = '+8:00';
-
 -- 创建数据库
 CREATE DATABASE IF NOT EXISTS geo_flow;
 USE geo_flow;

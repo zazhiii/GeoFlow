@@ -49,6 +49,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -97,7 +98,7 @@ public class GeoFileServiceImpl implements GeoFileService {
                 .objectName(objectName)
                 .url(url)
                 .fileSize(file.getSize())
-                .fileType(url.substring(url.lastIndexOf(".")))
+//                .fileType(url.substring(url.lastIndexOf(".")))
                 .description(description)
                 .build();
 
@@ -139,31 +140,46 @@ public class GeoFileServiceImpl implements GeoFileService {
         }
 
         // 获取文件元数据
-        GeoFileMetadataVO geoFileMetadataVO = new GeoFileMetadataVO();
+        GeoFileMetadataVO metadataVO = new GeoFileMetadataVO();
         // 1. 地理范围
         GeneralEnvelope envelope = reader.getOriginalEnvelope();
-        geoFileMetadataVO.setMinX(envelope.getMinimum(0));
-        geoFileMetadataVO.setMinY(envelope.getMinimum(1));
-        geoFileMetadataVO.setMaxX(envelope.getMaximum(0));
-        geoFileMetadataVO.setMaxY(envelope.getMaximum(1));
+        metadataVO.setMinX(envelope.getMinimum(0));
+        metadataVO.setMinY(envelope.getMinimum(1));
+        metadataVO.setMaxX(envelope.getMaximum(0));
+        metadataVO.setMaxY(envelope.getMaximum(1));
 
         // 2. 图像范围
         GridEnvelope gridRange = reader.getOriginalGridRange();
-        geoFileMetadataVO.setWidth(gridRange.getSpan(0));
-        geoFileMetadataVO.setHeight(gridRange.getSpan(1));
+        metadataVO.setWidth(gridRange.getSpan(0));
+        metadataVO.setHeight(gridRange.getSpan(1));
 
         // 3. 坐标系
         CoordinateReferenceSystem crs = reader.getCoordinateReferenceSystem();
         String crsName = crs.getName().toString();
-        geoFileMetadataVO.setCrs(crsName);
+        metadataVO.setCrs(crsName);
 
         // 4. 分辨率
         double resolutionX = envelope.getSpan(0) / gridRange.getSpan(0);
         double resolutionY = envelope.getSpan(1) / gridRange.getSpan(1);
-        geoFileMetadataVO.setResolutionX(resolutionX);
-        geoFileMetadataVO.setResolutionY(resolutionY);
+        metadataVO.setResolutionX(resolutionX);
+        metadataVO.setResolutionY(resolutionY);
 
-        return geoFileMetadataVO;
+        // 5. 波段数
+        GridCoverage2D coverage = null;
+        try {
+            coverage = reader.read(null);
+        } catch (IOException e) {
+            return metadataVO; // 读取失败，返回已有的元数据
+        }
+        SampleModel sampleModel = coverage.getRenderedImage().getSampleModel();
+        metadataVO.setBandCount(sampleModel.getNumBands());
+
+        // 6. 每个波段的位深
+        metadataVO.setBitDepth(Arrays.stream(sampleModel.getSampleSize())
+                .boxed()
+                .toList());
+
+        return metadataVO;
     }
 
     /**

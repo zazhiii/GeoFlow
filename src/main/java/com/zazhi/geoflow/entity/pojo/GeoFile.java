@@ -2,6 +2,7 @@ package com.zazhi.geoflow.entity.pojo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.zazhi.geoflow.enums.FileType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +24,7 @@ public class GeoFile implements Serializable {
     @JsonIgnore
     private String url; // 完整存储路径
     private Long fileSize; // 文件大小
-    private String fileType; // 文件类型(拓展名)
+    private FileType fileType; // 文件类型(拓展名)
     private String description; // 文件描述
 //    private Integer status; // (0: 上传中, 1: 上传完成, 2: 上传失败)
 //    private String uploadTaskId; // 上传任务ID
