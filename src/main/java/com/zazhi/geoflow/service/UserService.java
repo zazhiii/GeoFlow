@@ -34,9 +34,4 @@ public interface UserService {
      */
     void uploadAvatar(MultipartFile file);
 
-    /**
-     * 查询用户上传的文件
-     * @return 文件列表
-     */
-    List<GeoFile> getGeoFiles();
 }

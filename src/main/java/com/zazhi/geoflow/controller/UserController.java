@@ -69,42 +69,4 @@ public class UserController {
         return Result.success();
     }
 
-    @Operation(summary = "查询用户上传的文件")
-    @GetMapping(value = "geo_files")
-    public Result<List<GeoFile>> geoFiles() {
-        log.info("查询用户文件");
-
-        return Result.success(userService.getGeoFiles());
-    }
-
-
-//    @Operation(summary = "用户注销")
-//    @PostMapping(value = "logout")
-//    public Result logout() {
-//        log.info("用户注销");
-//        return Result.success();
-//    }
-
-
-//    @Operation(summary = "用户列表")
-//    @GetMapping(value = "list")
-//    public Result list() {
-//        log.info("用户列表");
-//        return Result.success();
-//    }
-//
-//    @Operation(summary = "用户删除")
-//    @DeleteMapping(value = "delete")
-//    public Result delete(@RequestParam Integer id) {
-//        log.info("用户删除");
-//        return Result.success();
-//    }
-//
-//    @Operation(summary = "用户更新")
-//    @PutMapping(value = "update")
-//    public Result update(@RequestParam Integer id) {
-//        log.info("用户更新");
-//        return Result.success();
-//    }
-
 }

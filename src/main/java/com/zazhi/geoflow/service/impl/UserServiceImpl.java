@@ -116,13 +116,4 @@ public class UserServiceImpl implements UserService {
         userMapper.update(user);
     }
 
-    /**
-     * 查询用户上传的文件
-     *
-     * @return 文件列表
-     */
-    @Override
-    public List<GeoFile> getGeoFiles() {
-        return userMapper.getGeoFiles(ThreadLocalUtil.getCurrentId());
-    }
 }

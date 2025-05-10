@@ -41,11 +41,4 @@ public interface UserMapper {
      */
     void update(User user);
 
-    /**
-     * 查询用户上传的文件
-     * @param currentId 当前用户id
-     * @return 文件列表
-     */
-    @Select("select * from geo_file where user_id = #{currentId}")
-    List<GeoFile> getGeoFiles(Integer currentId);
 }
