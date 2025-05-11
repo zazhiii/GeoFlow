@@ -4,7 +4,6 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.jwt.JWT;
 import com.zazhi.geoflow.config.properties.JWTProperties;
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
-import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.User;
 import com.zazhi.geoflow.mapper.UserMapper;
 import com.zazhi.geoflow.service.UserService;
@@ -15,8 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author zazhi

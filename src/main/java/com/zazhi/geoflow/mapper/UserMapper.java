@@ -1,12 +1,9 @@
 package com.zazhi.geoflow.mapper;
 
-import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.User;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
-
-import java.util.List;
 
 @Mapper
 public interface UserMapper {

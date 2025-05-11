@@ -2,18 +2,8 @@ package com.zazhi.geoflow.utils;
 
 import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
-import org.apache.tomcat.util.http.fileupload.FileItem;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * @author zazhi

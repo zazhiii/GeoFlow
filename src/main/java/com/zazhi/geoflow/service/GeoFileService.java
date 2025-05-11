@@ -1,6 +1,5 @@
 package com.zazhi.geoflow.service;
 
-import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.PageResult;
 import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
 import com.zazhi.geoflow.entity.vo.GeoFilePageVO;
@@ -61,4 +60,11 @@ public interface GeoFileService {
      * @return
      */
     String getDownloadUrl(Integer id);
+
+    /**
+     * 检查文件类型是否支持
+     * @param fileName
+     * @return
+     */
+    Boolean isSupport(String fileName);
 }

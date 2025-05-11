@@ -1,7 +1,5 @@
 package com.zazhi.geoflow.entity.pojo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.zazhi.geoflow.enums.FileType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

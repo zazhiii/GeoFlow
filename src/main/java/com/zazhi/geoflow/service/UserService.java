@@ -1,10 +1,7 @@
 package com.zazhi.geoflow.service;
 
-import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.User;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 public interface UserService {
     /**

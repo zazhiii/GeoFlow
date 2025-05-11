@@ -1,5 +1,7 @@
 package com.zazhi.geoflow.service.impl;
 
+import com.zazhi.geoflow.common.constant.ContentTypeConstant;
+import com.zazhi.geoflow.common.constant.FileConstant;
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.enums.FileType;
@@ -9,13 +11,13 @@ import com.zazhi.geoflow.utils.GeoFileUtil;
 import com.zazhi.geoflow.utils.ImageUtil;
 import com.zazhi.geoflow.utils.MinioUtil;
 import com.zazhi.geoflow.utils.ThreadLocalUtil;
-import io.minio.GetObjectArgs;
+import comzazhigeoflowcommonconstant.ExtensionConstant;
 import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.processing.CoverageProcessor;
 import org.geotools.coverage.processing.EmptyIntersectionException;
@@ -24,29 +26,26 @@ import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+
+import static com.zazhi.geoflow.common.constant.FileConstant.*;
 
 /**
  * @author zazhi
  * @date 2025/4/12
  * @description: 图像操作
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Tag(name = "操作", description = "操作管理")
@@ -147,14 +146,43 @@ public class OperationServiceImpl implements OperationService {
             }
         }
 
-        // 设置响应头
-        response.setContentType("image/png");
+        // 写入临时文件并上传
+        File tempFile = null;
         try {
-            ImageIO.write(rgb, "png", response.getOutputStream());
-            response.flushBuffer(); // 确保及时发送
+            tempFile = File.createTempFile(UPLOAD_TEMP_FILE_NAME, "." + ExtensionConstant.PNG);
+            ImageIO.write(rgb, "png", tempFile);
+            uploadFileToMinio(new FileInputStream(tempFile), tempFile.length(), FileConstant.CROP_FILE_NAME, ContentTypeConstant.PNG, ExtensionConstant.PNG);
         } catch (IOException e) {
-            throw new RuntimeException("写出文件失败");
+            throw new RuntimeException(e);
+        } finally {
+            if (tempFile != null && tempFile.exists()) {
+                boolean delete = tempFile.delete();
+                if(!delete){
+                    log.error("删除临时文件失败: {}", tempFile.getAbsolutePath());
+                }
+            }
         }
+
+        // 上传 BufferedImage 到 MinIO
+//        try (
+//                ByteArrayOutputStream os = new ByteArrayOutputStream();
+//                ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
+//        ) {
+//            ImageIO.write(rgb, "png", os);
+//            byte[] byteArray = os.toByteArray();
+//            uploadFileToMinio(is, byteArray.length, FileConstant.CROP_FILE_NAME, ContentTypeConstant.PNG, ExtensionConstant.PNG);
+//        } catch (IOException e) {
+//            throw new RuntimeException("写出文件失败");
+//        }
+
+        // 设置响应头
+//        response.setContentType("image/png");
+//        try {
+//            ImageIO.write(rgb, "png", response.getOutputStream());
+//            response.flushBuffer(); // 确保及时发送
+//        } catch (IOException e) {
+//            throw new RuntimeException("写出文件失败");
+//        }
     }
 
     /**
@@ -198,8 +226,8 @@ public class OperationServiceImpl implements OperationService {
         }
 
         // 临时文件目录
-        String tempDir = System.getProperty("java.io.tmpdir");
-        File cropDirectory = new File(tempDir, "geoflow_crop");
+        String tempDir = TEMP_PATH;
+        File cropDirectory = new File(TEMP_PATH, CROP_DIR);
         if (!cropDirectory.exists()) {
             cropDirectory.mkdirs();
         }
@@ -234,6 +262,26 @@ public class OperationServiceImpl implements OperationService {
         geoFileMapper.insert(cropGeoFile);
         // 删除临时文件
         cropFile.delete();
+    }
+
+    private void uploadFileToMinio(InputStream is, long objectSize, String fileName,
+                                   String contentType, String extension) {
+
+        String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String objectName = currentDate + "/" + UUID.randomUUID() + "." + extension;
+
+        String url = minioUtil.upload(is, objectSize, objectName, contentType);
+
+        // 保存到数据库
+        GeoFile cropGeoFile = GeoFile.builder()
+                .userId(ThreadLocalUtil.getCurrentId())
+                .fileName(fileName)
+                .objectName(objectName)
+                .url(url)
+                .fileSize(objectSize)
+                .fileType(FileType.fromValue(extension))
+                .build();
+        geoFileMapper.insert(cropGeoFile);
     }
 
     private int clamp(int val) {

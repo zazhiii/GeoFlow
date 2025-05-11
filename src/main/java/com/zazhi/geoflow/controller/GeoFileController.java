@@ -1,7 +1,6 @@
 package com.zazhi.geoflow.controller;
 
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
-import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.PageResult;
 import com.zazhi.geoflow.entity.pojo.Result;
 import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
@@ -110,5 +109,10 @@ public class GeoFileController {
         return Result.success(geoFileService.getDownloadUrl(id));
     }
 
+    @Operation(summary = "判断是否支持的文件类型")
+    @GetMapping("/is-support")
+        public Result<Boolean> isSupport(@RequestParam("fileName") String fileName) {
+        return Result.success(geoFileService.isSupport(fileName));
+    }
 
 }

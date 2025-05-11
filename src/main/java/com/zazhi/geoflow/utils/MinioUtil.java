@@ -172,6 +172,7 @@ public class MinioUtil {
                             .build()
             );
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("上传失败");
         }
         return prop.getEndpoint() + "/" + prop.getBucketName() + "/" + objectName;
