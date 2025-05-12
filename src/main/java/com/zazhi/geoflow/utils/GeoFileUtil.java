@@ -32,4 +32,21 @@ public class GeoFileUtil {
         return geoFile;
     }
 
+    /**
+     * 检查文件是否存在, 并且是否有权限访问
+     * @param id
+     * @param userId
+     * @return
+     */
+    public GeoFile checkFile(Integer id, Integer userId) {
+        GeoFile geoFile = geoFileMapper.getById(id);
+        if (geoFile == null) {
+            throw new RuntimeException("文件不存在");
+        }
+        if (geoFile.getUserId() != userId) {
+            throw new RuntimeException("没有权限访问该文件");
+        }
+        return geoFile;
+    }
+
 }

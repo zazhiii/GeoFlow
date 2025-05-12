@@ -21,7 +21,7 @@ public interface OperationService {
      * @param blueBondId
      * @param response
      */
-    void combineRGB(Integer redBondId, Integer greenBondId, Integer blueBondId, HttpServletResponse response);
+    void combineRGB(Integer redBondId, Integer greenBondId, Integer blueBondId);
 
     /**
      * 裁剪tiff文件

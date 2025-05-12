@@ -7,12 +7,14 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioAsyncClient;
 import io.minio.MinioClient;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Slf4j
 public class MinioConfig {
 
     @Autowired
@@ -52,6 +54,7 @@ public class MinioConfig {
                 );
             }
         } catch (Exception e) {
+            log.error("minio初始化失败", e);
             throw new RuntimeException("minio初始化失败");
         }
         return minioClient;

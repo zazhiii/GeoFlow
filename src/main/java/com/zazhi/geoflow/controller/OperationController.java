@@ -39,10 +39,9 @@ public class OperationController {
     public void combineRGB(
             @RequestParam("redBondId") Integer redBondId,
             @RequestParam("greenBondId") Integer greenBondId,
-            @RequestParam("blueBondId") Integer blueBondId,
-            HttpServletResponse response
+            @RequestParam("blueBondId") Integer blueBondId
     ){
-        operationService.combineRGB(redBondId, greenBondId, blueBondId, response);
+        operationService.combineRGB(redBondId, greenBondId, blueBondId);
     }
 
     @GetMapping("/ndvi")
