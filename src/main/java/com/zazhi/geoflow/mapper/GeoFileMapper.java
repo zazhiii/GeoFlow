@@ -3,10 +3,7 @@ package com.zazhi.geoflow.mapper;
 import com.github.pagehelper.Page;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.vo.GeoFilePageVO;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface GeoFileMapper {
@@ -16,6 +13,7 @@ public interface GeoFileMapper {
      */
     @Insert("insert into geo_file(user_id, file_name, object_name, url, file_size, file_type, description, upload_task_id) " +
             "values(#{userId}, #{fileName}, #{objectName}, #{url}, #{fileSize}, #{fileType}, #{description}, #{uploadTaskId})")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
     void insert(GeoFile geoFile);
 
     /**
@@ -47,4 +45,10 @@ public interface GeoFileMapper {
      * @return 文件
      */
     Page<GeoFilePageVO> page(Integer pageNum, Integer pageSize, String fileName, String fileType, Integer userId);
+
+    /**
+     * 更新文件
+     * @param geoFile 文件
+     */
+    void update(GeoFile geoFile);
 }

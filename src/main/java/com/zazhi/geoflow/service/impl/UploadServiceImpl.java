@@ -4,6 +4,7 @@ import com.zazhi.geoflow.config.properties.MinioConfigProperties;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.UploadTask;
 import com.zazhi.geoflow.entity.vo.TaskInfoVO;
+import com.zazhi.geoflow.enums.FileStatus;
 import com.zazhi.geoflow.enums.FileType;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.mapper.UploadMapper;
@@ -237,8 +238,7 @@ public class UploadServiceImpl implements UploadService {
                 .url(url)
                 .fileSize(uploadTask.getTotalSize())
                 .fileType(FileType.fromValue(extension))
-                .description(null)
-//                .status(1)
+                .status(FileStatus.UPLOADED.getCode())
                 .uploadTaskId(uploadTask.getId())
                 .build();
         geoFileMapper.insert(geoFile);

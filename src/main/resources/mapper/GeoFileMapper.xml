@@ -14,5 +14,15 @@
         </where>
     </select>
 
+    <update id="update" parameterType="com.zazhi.geoflow.entity.pojo.GeoFile">
+        UPDATE geo_file
+        <set>
+            <if test="description != null and description != ''">description = #{description},</if>
+            <if test="fileName != null and fileName != ''">file_name = #{fileName},</if>
+            <if test="fileSize != null and fileSize != ''">file_size = #{fileSize},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
 
 </mapper>

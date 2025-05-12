@@ -1,9 +1,9 @@
 package com.zazhi.geoflow.service.impl;
 
 import com.zazhi.geoflow.common.constant.ContentTypeConstant;
-import com.zazhi.geoflow.common.constant.FileConstant;
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
+import com.zazhi.geoflow.enums.FileStatus;
 import com.zazhi.geoflow.enums.FileType;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.service.OperationService;
@@ -14,7 +14,6 @@ import com.zazhi.geoflow.utils.ThreadLocalUtil;
 import comzazhigeoflowcommonconstant.ExtensionConstant;
 import com.zazhi.geoflow.utils.*;
 import io.minio.MinioClient;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -177,7 +176,6 @@ public class OperationServiceImpl implements OperationService {
      * @param redBondId
      * @param greenBondId
      * @param blueBondId
-     * @param response
      */
     @Override
     public void combineRGB(Integer redBondId, Integer greenBondId, Integer blueBondId) {
@@ -245,74 +243,48 @@ public class OperationServiceImpl implements OperationService {
             }
         }
 
-        // 写入临时文件并上传
-        File tempFile = null;
-        try {
-            tempFile = File.createTempFile(UPLOAD_TEMP_FILE_PREFIX, "." + ExtensionConstant.PNG);
-            ImageIO.write(rgb, "png", tempFile);
-            FileInputStream fis = new FileInputStream(tempFile);
-            uploadFileToMinio(fis, tempFile.length(), COMBINE_RGB_FILE_NAME, ContentTypeConstant.PNG, ExtensionConstant.PNG);
-            fis.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (tempFile != null && tempFile.exists()) {
-                boolean delete = tempFile.delete();
-                if(!delete){
-                    log.error("删除临时文件失败: {}", tempFile.getAbsolutePath());
-                }
-            }
-        }
+        // 保存到数据库
+        String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String objectName = currentDate + "/" + UUID.randomUUID() + "." + ExtensionConstant.PNG;
+        GeoFile geoFile = GeoFile.builder()
+                .userId(ThreadLocalUtil.getCurrentId())
+                .fileName(COMBINE_RGB_FILE_NAME)
+                .objectName(objectName)
+                .fileType(FileType.PNG)
+                .status(FileStatus.UPLOADING.getCode())
+                .build();
+        geoFileMapper.insert(geoFile);
+
+        // 异步上传到minio
+        uploadFileToMinIOAsync(rgb, objectName, geoFile);
     }
 
-    @Deprecated
-    public void combineRGB2(Integer redBondId, Integer greenBondId, Integer blueBondId) {
-        GeoFile RGeoFile = geoFileUtil.checkFile(redBondId);
-        GeoFile GGeoFile = geoFileUtil.checkFile(greenBondId);
-        GeoFile BGeoFile = geoFileUtil.checkFile(blueBondId);
-
-        String bucketName = minioProp.getBucketName();
-        // 从 MinIO 读取 GeoTIFF 文件
-        RenderedImage imgR = imageUtil.getRenderedImg(bucketName, RGeoFile.getObjectName());
-        RenderedImage imgG = imageUtil.getRenderedImg(bucketName, GGeoFile.getObjectName());
-        RenderedImage imgB = imageUtil.getRenderedImg(bucketName, BGeoFile.getObjectName());
-
-        int width = imgR.getWidth();
-        int height = imgR.getHeight();
-
-        Raster rasterR = imgR.getData();
-        Raster rasterG = imgG.getData();
-        Raster rasterB = imgB.getData();
-
-        BufferedImage rgb = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int r = clamp(rasterR.getSample(x, y, 0) / 256); // 简单拉伸
-                int g = clamp(rasterG.getSample(x, y, 0) / 256);
-                int b = clamp(rasterB.getSample(x, y, 0) / 256);
-                int rgbVal = (r << 16) | (g << 8) | b;
-                rgb.setRGB(x, y, rgbVal);
-            }
-        }
-
-        // 写入临时文件并上传
-        File tempFile = null;
-        try {
-            tempFile = File.createTempFile(UPLOAD_TEMP_FILE_PREFIX, "." + ExtensionConstant.PNG);
-            ImageIO.write(rgb, "png", tempFile);
-            uploadFileToMinio(new FileInputStream(tempFile), tempFile.length(), FileConstant.CROP_FILE_NAME, ContentTypeConstant.PNG, ExtensionConstant.PNG);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (tempFile != null && tempFile.exists()) {
-                boolean delete = tempFile.delete();
-                if(!delete){
-                    log.error("删除临时文件失败: {}", tempFile.getAbsolutePath());
+    private void uploadFileToMinIOAsync(BufferedImage rgb, String objectName, GeoFile geoFile) {
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            File tempFile = null;
+            try {
+                tempFile = File.createTempFile(UPLOAD_TEMP_FILE_PREFIX, "." + ExtensionConstant.PNG);
+                ImageIO.write(rgb, "png", tempFile);
+                FileInputStream fis = new FileInputStream(tempFile);
+                String url = minioUtil.upload(fis, tempFile.length(), objectName, ContentTypeConstant.PNG);
+                geoFile.setStatus(FileStatus.UPLOADED.getCode());
+                geoFile.setUrl(url);
+            } catch (Exception e) {
+                geoFile.setStatus(FileStatus.UPLOAD_FAILED.getCode());
+                log.error("上传文件失败", e);
+                throw new RuntimeException("上传文件失败");
+            } finally {
+                geoFileMapper.update(geoFile);
+                if (tempFile != null && tempFile.exists()) {
+                    boolean delete = tempFile.delete();
+                    if (!delete) {
+                        log.error("删除临时文件失败: {}", tempFile.getAbsolutePath());
+                    }
                 }
             }
-        }
+        });
     }
+
 
     /**
      * 裁剪tiff文件
@@ -391,26 +363,6 @@ public class OperationServiceImpl implements OperationService {
         geoFileMapper.insert(cropGeoFile);
         // 删除临时文件
         cropFile.delete();
-    }
-
-    private void uploadFileToMinio(InputStream is, long objectSize, String fileName,
-                                   String contentType, String extension) {
-
-        String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String objectName = currentDate + "/" + UUID.randomUUID() + "." + extension;
-
-        String url = minioUtil.upload(is, objectSize, objectName, contentType);
-
-        // 保存到数据库
-        GeoFile cropGeoFile = GeoFile.builder()
-                .userId(ThreadLocalUtil.getCurrentId())
-                .fileName(fileName)
-                .objectName(objectName)
-                .url(url)
-                .fileSize(objectSize)
-                .fileType(FileType.fromValue(extension))
-                .build();
-        geoFileMapper.insert(cropGeoFile);
     }
 
     private int clamp(int val) {

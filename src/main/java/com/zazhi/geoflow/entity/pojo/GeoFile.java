@@ -23,7 +23,7 @@ public class GeoFile implements Serializable {
     private Long fileSize; // 文件大小
     private FileType fileType; // 文件类型(拓展名)
     private String description; // 文件描述
-//    private Integer status; // (0: 上传中, 1: 上传完成, 2: 上传失败)
+    private Integer status; // (0: 上传中, 1: 上传完成, 2: 上传失败)
     private Integer uploadTaskId; // 上传主键ID
     private Date updateTime;
     private Date createTime;

@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/geo_flow?serverTimezone=Asia/Shanghai
+    username: geo_flow
+    password: 123456
+
+minio:
+  endpoint: http://47.108.51.109:9000
+  bucketName: geoflow
+  accessKey: 79r1ergTBIhgj8dFG7i8
+  secretKey: Pc6Qn2rgueqxjPiyTy8ZtCCsdKNFgOnW6iO8KyNc
