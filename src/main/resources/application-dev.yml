@@ -11,5 +11,5 @@ spring:
 minio:
   endpoint: http://localhost:9000
   bucketName: geoflow
-  accessKey: c53sjoXfTUqfj2jTT5cF
-  secretKey: MbdvTsqMk3I2E9QB64hw2Sh9njoW3BvZQABeyi6v
+  accessKey: PxoYhBpf9d1CVCtoJnf6
+  secretKey: JUJwr8NbXb5QgF1eLA4aMbwYWo9yIIlHNmmu5PUm

@@ -12,6 +12,7 @@ import com.zazhi.geoflow.utils.ImageUtil;
 import com.zazhi.geoflow.utils.MinioUtil;
 import com.zazhi.geoflow.utils.ThreadLocalUtil;
 import comzazhigeoflowcommonconstant.ExtensionConstant;
+import com.zazhi.geoflow.utils.*;
 import io.minio.MinioClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,7 +37,12 @@ import java.awt.image.RenderedImage;
 import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static com.zazhi.geoflow.common.constant.FileConstant.*;
 
@@ -63,16 +69,74 @@ public class OperationServiceImpl implements OperationService {
 
     private final GeoFileUtil geoFileUtil;
 
+    private final ThreadUtil threadUtil;
+
+    public void getNDVI2(Integer redBandId, Integer nirBandId, HttpServletResponse response) {
+
+        // 异步读取文件
+        CompletableFuture<RenderedImage> redFuture = CompletableFuture.supplyAsync(() -> {
+            GeoFile redBandFile = geoFileUtil.checkFile(redBandId);
+            return imageUtil.getRenderedImg(minioProp.getBucketName(), redBandFile.getObjectName());
+        });
+        CompletableFuture<RenderedImage> nirFuture = CompletableFuture.supplyAsync(() -> {
+            GeoFile nirBandFile = geoFileUtil.checkFile(nirBandId);
+            return imageUtil.getRenderedImg(minioProp.getBucketName(), nirBandFile.getObjectName());
+        });
+        RenderedImage redRenderedImg = null, nirRenderedImg = null;
+        try {
+            redRenderedImg = redFuture.get();
+            nirRenderedImg = nirFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("读取文件错误", e);
+            throw new RuntimeException("读取文件错误，{}", e);
+        }
+
+        Raster redRaster = redRenderedImg.getData();
+        Raster nirRaster = nirRenderedImg.getData();
+
+        int width = redRenderedImg.getWidth();
+        int height = redRenderedImg.getHeight();
+
+        BufferedImage ndviImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        // 异步计算
+        List<Future<?>> tasks = new ArrayList<>(height);
+
+        for (int y = 0; y < height; y++) {
+            final int row = y; // final 变量
+            Future<?> future = threadUtil.submit(() -> {
+                for (int x = 0; x < width; x++) {
+                    double nir = nirRaster.getSampleDouble(x, row, 0);
+                    double red = redRaster.getSampleDouble(x, row, 0);
+                    double ndvi = (nir + red == 0) ? 0 : (nir - red) / (nir + red);
+                    // 将NDVI值映射到颜色
+                    Color color = getNDVIColor(ndvi);
+                    ndviImage.setRGB(x, row, color.getRGB());
+                }
+            });
+
+            tasks.add(future);
+        }
+        for(Future<?> task : tasks) {
+            try {
+                task.get(); // 等待所有任务完成
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("NDVI计算错误", e);
+                throw new RuntimeException("NDVI计算错误，{}", e);
+            }
+        }
+
+        // 上传png TODO
+
+    }
+
     /**
-     * 获取NDVI
-     * * @param redBand 红色波段
-     *
-     * @param nirBand  近红外波段
+     * 计算 NDVI 值
+     * @param redBandId
+     * @param nirBandId
      * @param response
-     * @return NDVI值
      */
     @Override
-    @Operation(summary = "获取NDVI", description = "获取NDVI")
     public void getNDVI(Integer redBandId, Integer nirBandId, HttpServletResponse response) {
         GeoFile redBandFile = geoFileUtil.checkFile(redBandId);
         GeoFile nirBandFile = geoFileUtil.checkFile(nirBandId);
@@ -106,6 +170,72 @@ public class OperationServiceImpl implements OperationService {
         } catch (IOException e) {
             throw new RuntimeException("写出文件失败");
         }
+    }
+
+    public void combineRGB2(Integer redBondId, Integer greenBondId, Integer blueBondId) {
+        String bucketName = minioProp.getBucketName();
+
+        // 异步读取文件
+        CompletableFuture<RenderedImage> redFuture = CompletableFuture.supplyAsync(() -> {
+            GeoFile RGeoFile = geoFileUtil.checkFile(redBondId);
+            return imageUtil.getRenderedImg(bucketName, RGeoFile.getObjectName());
+        });
+
+        CompletableFuture<RenderedImage> greenFuture = CompletableFuture.supplyAsync(() -> {
+            GeoFile GGeoFile = geoFileUtil.checkFile(greenBondId);
+            return imageUtil.getRenderedImg(bucketName, GGeoFile.getObjectName());
+        });
+
+        CompletableFuture<RenderedImage> blueFuture = CompletableFuture.supplyAsync(() -> {
+            GeoFile BGeoFile = geoFileUtil.checkFile(blueBondId);
+            return imageUtil.getRenderedImg(bucketName, BGeoFile.getObjectName());
+        });
+
+        RenderedImage imgR = null, imgG = null, imgB = null;
+        try {
+            imgR = redFuture.get();
+            imgG = greenFuture.get();
+            imgB = blueFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("读取文件错误", e);
+            throw new RuntimeException("读取文件错误，{}", e);
+        }
+
+        int width = imgR.getWidth();
+        int height = imgR.getHeight();
+
+        Raster rasterR = imgR.getData();
+        Raster rasterG = imgG.getData();
+        Raster rasterB = imgB.getData();
+
+        BufferedImage rgb = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        List<Future<?>> tasks = new ArrayList<>(height);
+
+        for (int y = 0; y < height; y++) {
+            final int row =  y;
+            Future<?> future = threadUtil.submit(() -> {
+                for (int x = 0; x < width; x++) {
+                    int r = clamp(rasterR.getSample(x, row, 0) / 256); // 简单拉伸
+                    int g = clamp(rasterG.getSample(x, row, 0) / 256);
+                    int b = clamp(rasterB.getSample(x, row, 0) / 256);
+                    int rgbVal = (r << 16) | (g << 8) | b;
+                    rgb.setRGB(x, row, rgbVal);
+                }
+            });
+
+            tasks.add(future);
+        }
+        for(Future<?> task : tasks) {
+            try {
+                task.get(); // 等待所有任务完成
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("RGB合成错误", e);
+                throw new RuntimeException("RGB合成错误，{}", e);
+            }
+        }
+
+        // 上传 png TODO
     }
 
     /**
