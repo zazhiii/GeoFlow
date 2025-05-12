@@ -60,9 +60,17 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public TaskInfoVO initTask(String identifier, Long totalSize, Long chunkSize, String fileName) {
         // 构造 objectName: 日期/uuid.后缀
-        String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+
+        //检查文件类型是否支持
+        try {
+            FileType.fromValue(extension);
+        } catch (Exception e) {
+            throw new RuntimeException("暂不支持上传该文件类型");
+        }
+
         String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String objectName = currentDate + "/" + UUID.randomUUID() + "." + suffix;
+        String objectName = currentDate + "/" + UUID.randomUUID() + "." + extension;
         // 创建分片上传任务、获取 uploadId
         String uploadId = null;
         try {

@@ -13,12 +13,9 @@ create table user
     password        varchar(128) not null comment '密码',
     avatar          varchar(128) comment '头像',
     email           varchar(128) unique comment '邮箱地址',
-    phone_number    varchar(11)  unique comment '电话号码',
-    last_login_time timestamp comment '上次登录时间',
     update_time     timestamp default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP comment '更新时间',
     create_time     timestamp default CURRENT_TIMESTAMP comment '创建时间'
 ) comment '用户表';
-
 
 -- 文件信息表（file）
 DROP TABLE IF EXISTS geo_file;
@@ -34,8 +31,8 @@ CREATE TABLE geo_file (
     file_type VARCHAR(50) NOT NULL COMMENT '文件类型(MIME/扩展名)',
 --    status TINYINT NOT NULL DEFAULT 0 COMMENT '文件状态(0: 上传中, 1: 上传完成, 2: 上传失败)',
     upload_task_id INT COMMENT '上传任务主键ID',
-    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
+    update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
+    create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
 ) COMMENT='文件信息表';
 
 
@@ -51,8 +48,8 @@ create table upload_task(
     total_size      mediumtext   not null comment '文件大小（byte）',
     chunk_size      mediumtext   not null comment '每个分片大小（byte）',
     chunk_num       int          null comment '分片数量',
-    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
+    update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
+    create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
 ) comment '分片上传任务';
 
 -- 数据集表
@@ -62,7 +59,7 @@ create table data_set(
     name varchar(50) not null comment '数据集名字',
     user_id int not null comment '数据集所属用户ID',
     sensor_type varchar(50) not null comment '传感器类型（卫星）',
-    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
-    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
+    update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
+    create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
 )  comment '数据集';
 

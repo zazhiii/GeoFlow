@@ -3,10 +3,11 @@ package com.zazhi.geoflow.service.impl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
-import com.zazhi.geoflow.entity.pojo.DataSet;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.PageResult;
 import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
+import com.zazhi.geoflow.entity.vo.GeoFilePageVO;
+import com.zazhi.geoflow.enums.FileType;
 import com.zazhi.geoflow.mapper.DataSetMapper;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.mapper.UploadMapper;
@@ -15,45 +16,28 @@ import com.zazhi.geoflow.utils.GeoFileUtil;
 import com.zazhi.geoflow.utils.ImageUtil;
 import com.zazhi.geoflow.utils.MinioUtil;
 import com.zazhi.geoflow.utils.ThreadLocalUtil;
-import io.minio.GetObjectArgs;
+import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
+import io.minio.http.Method;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.processing.CoverageProcessor;
-import org.geotools.coverage.processing.EmptyIntersectionException;
-import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.GeneralEnvelope;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.coverage.grid.GridEnvelope;
-import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.io.*;
-import java.nio.file.Files;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Arrays;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * @author zazhi
@@ -195,12 +179,12 @@ public class GeoFileServiceImpl implements GeoFileService {
      * @param fileType 文件类型
      * @return 文件列表
      */
-    public PageResult list(Integer pageNum, Integer pageSize, String fileName, String fileType) {
+    public PageResult<GeoFilePageVO> list(Integer pageNum, Integer pageSize, String fileName, String fileType) {
         PageHelper.startPage(pageNum, pageSize);
         // 获取当前用户ID
         Integer userId = ThreadLocalUtil.getCurrentId();
-        Page<GeoFile> res = geoFileMapper.page(pageNum, pageSize, fileName, fileType, userId);
-        return new PageResult<GeoFile>(res.getTotal(), res.getResult());
+        Page<GeoFilePageVO> res = geoFileMapper.page(pageNum, pageSize, fileName, fileType, userId);
+        return new PageResult<GeoFilePageVO>(res.getTotal(), res.getResult());
     }
 
     /**
@@ -259,5 +243,45 @@ public class GeoFileServiceImpl implements GeoFileService {
             }
         }
         return histogram;
+    }
+
+    /**
+     * 获取文件下载地址
+     *
+     * @param id 文件id
+     * @return 文件下载地址
+     */
+    public String getDownloadUrl(Integer id) {
+        GeoFile geoFile = geoFileUtil.checkFile(id);
+
+        try {
+            String url = minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Method.GET)
+                            .bucket(minioProp.getBucketName())
+                            .object(geoFile.getObjectName())
+                            .expiry(60 * 60 * 3) // 有效期秒数 TODO 抽取为配置
+                            .build());
+            return url;
+        } catch (Exception e) {
+            log.error("获取文件下载地址失败", e);
+            throw new RuntimeException("获取文件下载地址失败");
+        }
+    }
+
+    /**
+     * 检查文件类型是否支持
+     * @param extension
+     * @return
+     */
+    @Override
+    public Boolean isSupport(String fileName) {
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+        try{
+            FileType.fromValue(extension);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
     }
 }

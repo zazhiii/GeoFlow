@@ -3,7 +3,9 @@ package com.zazhi.geoflow.enums;
 import lombok.Getter;
 
 public enum FileType {
-    TIFF("tif");
+    TIFF("tif"),
+    GZIP("gz"),
+    PNG("png");
 
     @Getter
     private String extension;

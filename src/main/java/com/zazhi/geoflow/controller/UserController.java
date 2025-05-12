@@ -1,20 +1,15 @@
 package com.zazhi.geoflow.controller;
 
-import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.Result;
 import com.zazhi.geoflow.entity.pojo.User;
 import com.zazhi.geoflow.service.UserService;
 import com.zazhi.geoflow.utils.ThreadLocalUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 /**
  * @author zazhi
@@ -68,43 +63,5 @@ public class UserController {
         userService.uploadAvatar(file);
         return Result.success();
     }
-
-    @Operation(summary = "查询用户上传的文件")
-    @GetMapping(value = "geo_files")
-    public Result<List<GeoFile>> geoFiles() {
-        log.info("查询用户文件");
-
-        return Result.success(userService.getGeoFiles());
-    }
-
-
-//    @Operation(summary = "用户注销")
-//    @PostMapping(value = "logout")
-//    public Result logout() {
-//        log.info("用户注销");
-//        return Result.success();
-//    }
-
-
-//    @Operation(summary = "用户列表")
-//    @GetMapping(value = "list")
-//    public Result list() {
-//        log.info("用户列表");
-//        return Result.success();
-//    }
-//
-//    @Operation(summary = "用户删除")
-//    @DeleteMapping(value = "delete")
-//    public Result delete(@RequestParam Integer id) {
-//        log.info("用户删除");
-//        return Result.success();
-//    }
-//
-//    @Operation(summary = "用户更新")
-//    @PutMapping(value = "update")
-//    public Result update(@RequestParam Integer id) {
-//        log.info("用户更新");
-//        return Result.success();
-//    }
 
 }

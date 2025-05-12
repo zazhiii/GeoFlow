@@ -1,10 +1,10 @@
 package com.zazhi.geoflow.controller;
 
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
-import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.PageResult;
 import com.zazhi.geoflow.entity.pojo.Result;
 import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
+import com.zazhi.geoflow.entity.vo.GeoFilePageVO;
 import com.zazhi.geoflow.service.GeoFileService;
 import com.zazhi.geoflow.utils.MinioUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,7 +47,7 @@ public class GeoFileController {
 
     @Operation(summary = "获取文件列表")
     @GetMapping("/list")
-    public Result<PageResult<GeoFile>> list(
+    public Result<PageResult<GeoFilePageVO>> page(
             @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(value = "fileName", required = false) String fileName,
@@ -89,8 +89,8 @@ public class GeoFileController {
     }
 
     @Operation(summary = "获取元数据")
-    @GetMapping("/get-metadata")
-    public Result<GeoFileMetadataVO> getMetadata(@RequestParam("id") Integer id) {
+    @GetMapping("/metadata/{id}")
+    public Result<GeoFileMetadataVO> getMetadata(@PathVariable("id") Integer id) {
         return Result.success(geoFileService.getMetadata(id));
     }
 
@@ -103,6 +103,16 @@ public class GeoFileController {
         return Result.success(geoFileService.computeHistogram(id, band, binSize));
     }
 
+    @Operation(summary = "获取文件下载地址")
+    @GetMapping("/download-url")
+    public Result<String> getDownloadUrl(@RequestParam("id") Integer id) {
+        return Result.success(geoFileService.getDownloadUrl(id));
+    }
 
+    @Operation(summary = "判断是否支持的文件类型")
+    @GetMapping("/is-support")
+        public Result<Boolean> isSupport(@RequestParam("fileName") String fileName) {
+        return Result.success(geoFileService.isSupport(fileName));
+    }
 
 }

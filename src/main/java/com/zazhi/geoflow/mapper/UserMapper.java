@@ -1,12 +1,9 @@
 package com.zazhi.geoflow.mapper;
 
-import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.User;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
-
-import java.util.List;
 
 @Mapper
 public interface UserMapper {
@@ -41,11 +38,4 @@ public interface UserMapper {
      */
     void update(User user);
 
-    /**
-     * 查询用户上传的文件
-     * @param currentId 当前用户id
-     * @return 文件列表
-     */
-    @Select("select * from geo_file where user_id = #{currentId}")
-    List<GeoFile> getGeoFiles(Integer currentId);
 }

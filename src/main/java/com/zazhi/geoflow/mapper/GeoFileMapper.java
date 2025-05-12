@@ -2,6 +2,7 @@ package com.zazhi.geoflow.mapper;
 
 import com.github.pagehelper.Page;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
+import com.zazhi.geoflow.entity.vo.GeoFilePageVO;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -45,5 +46,5 @@ public interface GeoFileMapper {
      * @param userId 用户ID
      * @return 文件
      */
-    Page<GeoFile> page(Integer pageNum, Integer pageSize, String fileName, String fileType, Integer userId);
+    Page<GeoFilePageVO> page(Integer pageNum, Integer pageSize, String fileName, String fileType, Integer userId);
 }

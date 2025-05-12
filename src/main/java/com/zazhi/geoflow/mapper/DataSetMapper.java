@@ -1,7 +1,6 @@
 package com.zazhi.geoflow.mapper;
 
 import com.zazhi.geoflow.entity.pojo.DataSet;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 

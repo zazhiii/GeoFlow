@@ -5,7 +5,7 @@
 <mapper namespace="com.zazhi.geoflow.mapper.GeoFileMapper">
 
 
-    <select id="page" resultType="com.zazhi.geoflow.entity.pojo.GeoFile">
+    <select id="page" resultType="com.zazhi.geoflow.entity.vo.GeoFilePageVO">
         SELECT * FROM geo_file
         <where>
             <if test="fileName != null and fileName != ''"> and file_name LIKE CONCAT('%', #{fileName}, '%')</if>

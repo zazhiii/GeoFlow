@@ -1,8 +1,8 @@
 package com.zazhi.geoflow.service;
 
-import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.pojo.PageResult;
 import com.zazhi.geoflow.entity.vo.GeoFileMetadataVO;
+import com.zazhi.geoflow.entity.vo.GeoFilePageVO;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,7 +37,7 @@ public interface GeoFileService {
      * @param fileType 文件类型
      * @return 文件列表
      */
-    PageResult list(Integer pageNum, Integer pageSize, String fileName, String fileType);
+    PageResult<GeoFilePageVO> list(Integer pageNum, Integer pageSize, String fileName, String fileType);
 
     /**
      * 预览 GeoTiff 文件
@@ -53,4 +53,18 @@ public interface GeoFileService {
      * @return
      */
     Map<Integer, Long> computeHistogram(Integer id, Integer band, Integer binSize);
+
+    /**
+     * 获取文件下载地址
+     * @param id
+     * @return
+     */
+    String getDownloadUrl(Integer id);
+
+    /**
+     * 检查文件类型是否支持
+     * @param fileName
+     * @return
+     */
+    Boolean isSupport(String fileName);
 }

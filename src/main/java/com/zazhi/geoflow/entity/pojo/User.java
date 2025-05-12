@@ -23,8 +23,6 @@ public class User implements Serializable {
     private String password; // 密码
     private String avatar; // 头像
     private String email; // 邮箱地址
-    private String phoneNumber; // 电话号码
-    private Date lastLoginTime; // 上次登录时间
     private Date updateTime; // 更新时间
     private Date createTime; // 创建时间
 }
