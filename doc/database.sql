@@ -36,10 +36,11 @@ CREATE TABLE geo_file (
 ) COMMENT='文件信息表';
 
 
--- 创建表
+-- 上传任务表
 DROP TABLE IF EXISTS upload_task;
 create table upload_task(
     id              int auto_increment primary key,
+    user_id         int not null comment '用户ID',
     upload_id       varchar(255) not null comment '分片上传任务id',
     file_identifier varchar(500) not null comment '文件唯一标识（md5）',
     file_name       varchar(500) not null comment '文件名称',

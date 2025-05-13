@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UploadTask {
     Integer id;
+    Integer userId; // 用户id
     String uploadId; // 上传的任务 id
     String fileIdentifier; // 文件标识
     String fileName; // 文件名

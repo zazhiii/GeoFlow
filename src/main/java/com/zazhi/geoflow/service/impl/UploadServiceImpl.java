@@ -86,6 +86,7 @@ public class UploadServiceImpl implements UploadService {
         }
         // 创建 uploadTask 记录、存入数据库
         UploadTask uploadTask = UploadTask.builder()
+                .userId(ThreadLocalUtil.getCurrentId())
                 .uploadId(uploadId)
                 .fileIdentifier(identifier)
                 .fileName(fileName)
@@ -114,7 +115,7 @@ public class UploadServiceImpl implements UploadService {
      */
     @Override
     public String getPresignedObjectUrl(String identifier, Integer partNumber){
-        UploadTask uploadTask = uploadMapper.getByIdentifier(identifier);
+        UploadTask uploadTask = uploadMapper.getByIdentifierAndUserId(identifier, ThreadLocalUtil.getCurrentId());
         if(uploadTask == null){
             throw new RuntimeException("上传任务不存在");
         }
@@ -145,7 +146,7 @@ public class UploadServiceImpl implements UploadService {
      */
     @Override
     public TaskInfoVO getTaskInfo(String identifier) {
-        UploadTask uploadTask = uploadMapper.getByIdentifier(identifier);
+        UploadTask uploadTask = uploadMapper.getByIdentifierAndUserId(identifier, ThreadLocalUtil.getCurrentId());
         if(uploadTask == null){
             return null; // 任务不存在, 返回null, 前端得知任务不存在, 调用初始化接口
         }
@@ -183,7 +184,7 @@ public class UploadServiceImpl implements UploadService {
      */
     @Override
     public void merge(String identifier) {
-        UploadTask uploadTask = uploadMapper.getByIdentifier(identifier);
+        UploadTask uploadTask = uploadMapper.getByIdentifierAndUserId(identifier, ThreadLocalUtil.getCurrentId());
         if(uploadTask == null){
             throw new RuntimeException("上传任务不存在");
         }
