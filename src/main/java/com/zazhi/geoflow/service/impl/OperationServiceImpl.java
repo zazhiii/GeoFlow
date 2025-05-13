@@ -5,8 +5,13 @@ import com.zazhi.geoflow.config.properties.MinioConfigProperties;
 import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.enums.FileStatus;
 import com.zazhi.geoflow.enums.FileType;
+import com.zazhi.geoflow.enums.StretchMode;
 import com.zazhi.geoflow.mapper.GeoFileMapper;
 import com.zazhi.geoflow.service.OperationService;
+import com.zazhi.geoflow.strategy.BandProcessor;
+import com.zazhi.geoflow.strategy.LinearStretch;
+import com.zazhi.geoflow.strategy.SimpleStretch;
+import com.zazhi.geoflow.strategy.StretchStrategy;
 import com.zazhi.geoflow.utils.GeoFileUtil;
 import com.zazhi.geoflow.utils.ImageUtil;
 import com.zazhi.geoflow.utils.MinioUtil;
@@ -178,7 +183,7 @@ public class OperationServiceImpl implements OperationService {
      * @param blueBondId
      */
     @Override
-    public void combineRGB(Integer redBondId, Integer greenBondId, Integer blueBondId) {
+    public void combineRGB(Integer redBondId, Integer greenBondId, Integer blueBondId, String stretchMode) {
         // 异步读取文件
         String bucketName = minioProp.getBucketName();
         Integer userId = ThreadLocalUtil.getCurrentId();
@@ -204,7 +209,6 @@ public class OperationServiceImpl implements OperationService {
             throw new RuntimeException("读取文件错误，{}", e);
         }
 
-        // 多线程合成RGB
         int width = imgR.getWidth();
         int height = imgR.getHeight();
 
@@ -217,7 +221,43 @@ public class OperationServiceImpl implements OperationService {
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         int batchSize = height / availableProcessors;
 
+        // 计算最值
+        int minR = Integer.MAX_VALUE, maxR = Integer.MIN_VALUE;
+        int minG = Integer.MAX_VALUE, maxG = Integer.MIN_VALUE;
+        int minB = Integer.MAX_VALUE, maxB = Integer.MIN_VALUE;
+        for(int i = 0; i < height; i ++){
+            for(int j = 0; j < width; j ++){
+                int r = rasterR.getSample(j, i, 0);
+                int g = rasterG.getSample(j, i, 0);
+                int b = rasterB.getSample(j, i, 0);
+                minR = Math.min(minR, r);
+                maxR = Math.max(maxR, r);
+                minG = Math.min(minG, g);
+                maxG = Math.max(maxG, g);
+                minB = Math.min(minB, b);
+                maxB = Math.max(maxB, b);
+            }
+        }
+
+        // 拉伸策略
+        StretchStrategy stretchStrategy;
+        StretchMode mode = StretchMode.fromValue(stretchMode);
+        switch (mode) {
+            case SIMPLE:
+                stretchStrategy = new SimpleStretch();
+                break;
+            case LINEAR:
+                stretchStrategy = new LinearStretch();
+                break;
+            default:
+                throw new IllegalArgumentException("不支持的拉伸模式: " + stretchMode); // 这里应该不会抛出异常, 因为已经在前面校验了
+        }
+        BandProcessor bandProcessor = new BandProcessor(stretchStrategy);
+
+        // 多线程合成RGB
         List<Future<?>> tasks = new ArrayList<>(availableProcessors);
+
+        int fMinR = minR, fMaxR = maxR, fMinG = minG, fMaxG = maxG, fMinB = minB, fMaxB = maxB;
 
         for(int i = 0; i < availableProcessors; i ++){
             final int startY = i * batchSize;
@@ -225,9 +265,9 @@ public class OperationServiceImpl implements OperationService {
             tasks.add(threadUtil.submit(() -> {
                 for (int y = startY; y < endY; y++) {
                     for (int x = 0; x < width; x++) {
-                        int r = clamp(rasterR.getSample(x, y, 0) / 256); // 简单拉伸
-                        int g = clamp(rasterG.getSample(x, y, 0) / 256);
-                        int b = clamp(rasterB.getSample(x, y, 0) / 256);
+                        int r = bandProcessor.processPixel(rasterR.getSample(x, y, 0), fMinR, fMaxR);
+                        int g = bandProcessor.processPixel(rasterG.getSample(x, y, 0), fMinG, fMaxG);
+                        int b = bandProcessor.processPixel(rasterB.getSample(x, y, 0), fMinB, fMaxB);
                         int rgbVal = (r << 16) | (g << 8) | b;
                         rgb.setRGB(x, y, rgbVal);
                     }
@@ -248,7 +288,7 @@ public class OperationServiceImpl implements OperationService {
         String objectName = currentDate + "/" + UUID.randomUUID() + "." + ExtensionConstant.PNG;
         GeoFile geoFile = GeoFile.builder()
                 .userId(ThreadLocalUtil.getCurrentId())
-                .fileName(COMBINE_RGB_FILE_NAME)
+                .fileName(stretchMode + COMBINE_RGB_FILE_NAME)
                 .objectName(objectName)
                 .fileType(FileType.PNG)
                 .status(FileStatus.UPLOADING.getCode())
@@ -267,6 +307,8 @@ public class OperationServiceImpl implements OperationService {
                 ImageIO.write(rgb, "png", tempFile);
                 FileInputStream fis = new FileInputStream(tempFile);
                 String url = minioUtil.upload(fis, tempFile.length(), objectName, ContentTypeConstant.PNG);
+                fis.close();
+                geoFile.setFileSize(tempFile.length());
                 geoFile.setStatus(FileStatus.UPLOADED.getCode());
                 geoFile.setUrl(url);
             } catch (Exception e) {

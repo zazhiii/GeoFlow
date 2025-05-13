@@ -39,9 +39,10 @@ public class OperationController {
     public void combineRGB(
             @RequestParam("redBondId") Integer redBondId,
             @RequestParam("greenBondId") Integer greenBondId,
-            @RequestParam("blueBondId") Integer blueBondId
+            @RequestParam("blueBondId") Integer blueBondId,
+            @RequestParam(value = "stretchMode", defaultValue = "SIMPLE") String stretchMode
     ){
-        operationService.combineRGB(redBondId, greenBondId, blueBondId);
+        operationService.combineRGB(redBondId, greenBondId, blueBondId, stretchMode);
     }
 
     @GetMapping("/ndvi")
