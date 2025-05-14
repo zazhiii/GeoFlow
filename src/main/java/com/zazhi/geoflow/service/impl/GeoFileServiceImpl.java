@@ -36,6 +36,7 @@ import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
 
@@ -179,7 +180,7 @@ public class GeoFileServiceImpl implements GeoFileService {
      * @param fileType 文件类型
      * @return 文件列表
      */
-    public PageResult<GeoFilePageVO> list(Integer pageNum, Integer pageSize, String fileName, String fileType) {
+    public PageResult<GeoFilePageVO> page(Integer pageNum, Integer pageSize, String fileName, String fileType) {
         PageHelper.startPage(pageNum, pageSize);
         // 获取当前用户ID
         Integer userId = ThreadLocalUtil.getCurrentId();
@@ -283,5 +284,17 @@ public class GeoFileServiceImpl implements GeoFileService {
         }catch (Exception e){
             return false;
         }
+    }
+
+    /**
+     * 获取文件列表
+     *
+     * @param fileName 文件名
+     * @param fileType 文件类型
+     * @return 文件列表
+     */
+    @Override
+    public List<GeoFilePageVO> list(String fileName, String fileType) {
+        return geoFileMapper.list(fileName, fileType, ThreadLocalUtil.getCurrentId());
     }
 }

@@ -5,6 +5,8 @@ import com.zazhi.geoflow.entity.pojo.GeoFile;
 import com.zazhi.geoflow.entity.vo.GeoFilePageVO;
 import org.apache.ibatis.annotations.*;
 
+import java.util.List;
+
 @Mapper
 public interface GeoFileMapper {
     /**
@@ -51,4 +53,13 @@ public interface GeoFileMapper {
      * @param geoFile 文件
      */
     void update(GeoFile geoFile);
+
+    /**
+     * 根据文件名和类型查询文件列表
+     * @param fileName 文件名
+     * @param fileType 文件类型
+     * @param userId 当前用户ID
+     * @return 文件列表
+     */
+    List<GeoFilePageVO> list(String fileName, String fileType, Integer userId);
 }

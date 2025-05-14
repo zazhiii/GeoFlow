@@ -25,4 +25,13 @@
         WHERE id = #{id}
     </update>
 
+    <select id="list" resultType="com.zazhi.geoflow.entity.vo.GeoFilePageVO">
+        select * from geo_file
+        <where>
+            <if test="fileName != null and fileName != ''"> and file_name LIKE CONCAT('%', #{fileName}, '%')</if>
+            <if test="fileType != null and fileType != ''"> and file_type = #{fileType}</if>
+            and user_id = #{userId}
+        </where>
+    </select>
+
 </mapper>

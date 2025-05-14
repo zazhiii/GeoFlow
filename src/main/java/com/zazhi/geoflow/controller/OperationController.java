@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
  * @description:
  */
 @RestController
-@RequestMapping("/operation")
+@RequestMapping("/api/operation")
 @Tag(name = "操作", description = "操作管理")
 @RequiredArgsConstructor
 public class OperationController {

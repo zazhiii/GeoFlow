@@ -6,6 +6,7 @@ import com.zazhi.geoflow.entity.vo.GeoFilePageVO;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 public interface GeoFileService {
@@ -37,7 +38,7 @@ public interface GeoFileService {
      * @param fileType 文件类型
      * @return 文件列表
      */
-    PageResult<GeoFilePageVO> list(Integer pageNum, Integer pageSize, String fileName, String fileType);
+    PageResult<GeoFilePageVO> page(Integer pageNum, Integer pageSize, String fileName, String fileType);
 
     /**
      * 预览 GeoTiff 文件
@@ -67,4 +68,13 @@ public interface GeoFileService {
      * @return
      */
     Boolean isSupport(String fileName);
+
+    /**
+     * 获取文件列表
+     * @param fileName
+     * @param fileType
+     * @return
+     */
+    List<GeoFilePageVO> list(String fileName, String fileType);
+
 }

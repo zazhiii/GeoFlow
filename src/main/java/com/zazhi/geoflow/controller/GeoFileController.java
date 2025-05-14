@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,15 +46,24 @@ public class GeoFileController {
         geoFileService.previewTiff(id, response);
     }
 
-    @Operation(summary = "获取文件列表")
-    @GetMapping("/list")
+    @Operation(summary = "分页查询文件列表")
+    @GetMapping("/page")
     public Result<PageResult<GeoFilePageVO>> page(
             @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(value = "fileName", required = false) String fileName,
             @RequestParam(value = "fileType", required = false) String fileType
     ) {
-        return Result.success(geoFileService.list(pageNum, pageSize, fileName, fileType));
+        return Result.success(geoFileService.page(pageNum, pageSize, fileName, fileType));
+    }
+
+    @Operation(summary = "获取文件列表")
+    @GetMapping("/list")
+    public Result<List<GeoFilePageVO>> list(
+            @RequestParam(value = "fileName", required = false) String fileName,
+            @RequestParam(value = "fileType", required = false) String fileType
+    ) {
+        return Result.success(geoFileService.list(fileName, fileType));
     }
 
     @Operation(summary = "文件直接上传")
