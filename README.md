@@ -12,7 +12,46 @@ GeoFlow 是一个基于 Java 的遥感图像处理系统，旨在提供高效、
 ## 技术选型
 
 ## 部署
+### 环境要求
+| 组件      | 版本推荐                              |
+| ------- | --------------------------------- |
+| JDK     | 17+                               |
+| MySQL   | 8.0+                              |
+| MinIO   | RELEASE.2023+                     |
+| Maven   | 3.8+                              |
+| Git     | 可选（用于拉取仓库）                        |
+| 操作系统    | Windows / Linux（推荐 Ubuntu 20.04+） |
 
+### 数据库配置
+1. 安装并启动MySQL
+2. 运行doc/database.sql（创建数据库和表结构）
+3. 修改项目的数据库链接配置
+```yml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/geo_flow?useSSL=false&serverTimezone=UTC # 修改为你的数据库ip + 端口
+    username: root  # 修改
+    password: 123456  # 修改
+```
+### 对象存储（MinIO）配置
+1. 下载并启动MinIO，并创建AccessKey和AccessSecret
+2. 修改项目的MinIO配置
+```yml
+minio:
+  endpoint: http://localhost:9000 # 修改为你的MinIO运行的ip + 端口
+  bucketName: geoflow # 这个可以不修改
+  accessKey: J9oSiTvI3Pf2yRmd0CrS # 修改
+  secretKey: QjhGtPnUaLY5fuzg3HSrSEq4wx5HzqqjYQwddVA8 # 修改
+```
+### 后端运行
+1. 命令行构建
+```bash
+mvn clean install
+```
+2. 启动SpringBoot项目
+```bash
+java -jar target/GeoFlow-0.0.1-SNAPSHOT.jar
+```
 ## 贡献指南
 欢迎对 GeoFlow 项目提出改进建议或贡献代码。请遵循以下步骤：
 
