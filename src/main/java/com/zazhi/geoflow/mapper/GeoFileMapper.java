@@ -13,8 +13,8 @@ public interface GeoFileMapper {
      * 插入文件
      * @param geoFile 文件
      */
-    @Insert("insert into geo_file(user_id, file_name, object_name, url, file_size, file_type, description, upload_task_id) " +
-            "values(#{userId}, #{fileName}, #{objectName}, #{url}, #{fileSize}, #{fileType}, #{description}, #{uploadTaskId})")
+    @Insert("insert into geo_file(user_id, file_name, object_name, url, file_size, file_type, description, upload_task_id, status) " +
+            "values(#{userId}, #{fileName}, #{objectName}, #{url}, #{fileSize}, #{fileType}, #{description}, #{uploadTaskId}, #{status})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void insert(GeoFile geoFile);
 

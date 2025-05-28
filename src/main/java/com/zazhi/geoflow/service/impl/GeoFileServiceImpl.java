@@ -200,21 +200,18 @@ public class GeoFileServiceImpl implements GeoFileService {
         // 从 MinIO 读取 GeoTIFF 文件
         GeoTiffReader reader = null;
         GridCoverage2D coverage = null;
-        try (InputStream inputStream = minioUtil.getObject(minioProp.getBucketName(), geoFile.getObjectName())) {
+        try (InputStream inputStream = minioUtil.getObject(minioProp.getBucketName(), geoFile.getObjectName());
+             OutputStream os = response.getOutputStream()) {
             reader = new GeoTiffReader(inputStream);
             coverage = reader.read(null);
+            // 渲染为图像
+            RenderedImage renderedImage = coverage.getRenderedImage();
+            // 写出为 PNG
+            response.setContentType("image/png");
+            ImageIO.write(renderedImage, "png", os);
+            response.flushBuffer(); // 确保及时发送
         } catch (Exception e) {
             throw new RuntimeException("读取文件失败");
-        }
-        // 渲染为图像
-        RenderedImage renderedImage = coverage.getRenderedImage();
-        // 写出为 PNG
-        response.setContentType("image/png");
-        try {
-            ImageIO.write(renderedImage, "png", response.getOutputStream());
-            response.flushBuffer(); // 确保及时发送
-        } catch (IOException e) {
-            throw new RuntimeException("写出文件失败");
         }
     }
 
