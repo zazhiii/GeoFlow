@@ -166,14 +166,28 @@ public class OperationServiceImpl implements OperationService {
                 ndviImage.setRGB(x, y, color.getRGB());
             }
         }
-        // 设置响应头
-        response.setContentType("image/png");
-        try {
-            ImageIO.write(ndviImage, "png", response.getOutputStream());
-            response.flushBuffer(); // 确保及时发送
-        } catch (IOException e) {
-            throw new RuntimeException("写出文件失败");
-        }
+//        // 设置响应头
+//        response.setContentType("image/png");
+//        try {
+//            ImageIO.write(ndviImage, "png", response.getOutputStream());
+//            response.flushBuffer(); // 确保及时发送
+//        } catch (IOException e) {
+//            throw new RuntimeException("写出文件失败");
+//        }
+
+        String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String objectName = currentDate + "/" + UUID.randomUUID() + "." + ExtensionConstant.PNG;
+        GeoFile geoFile = GeoFile.builder()
+                .userId(ThreadLocalUtil.getCurrentId())
+                .fileName(NDVI_FILE_NAME)
+                .objectName(objectName)
+                .fileType(FileType.PNG)
+                .status(FileStatus.UPLOADING.getCode())
+                .build();
+        geoFileMapper.insert(geoFile);
+
+        // 异步上传到minio
+        uploadFileToMinIOAsync(ndviImage, objectName, geoFile);
     }
 
     /**
@@ -278,8 +292,7 @@ public class OperationServiceImpl implements OperationService {
             try {
                 task.get(); // 等待所有任务完成
             } catch (InterruptedException | ExecutionException e) {
-                log.error("RGB合成错误", e);
-                throw new RuntimeException("RGB合成错误，{}", e);
+                throw new RuntimeException("RGB合成错误");
             }
         }
 
@@ -299,6 +312,12 @@ public class OperationServiceImpl implements OperationService {
         uploadFileToMinIOAsync(rgb, objectName, geoFile);
     }
 
+    /**
+     * 异步上传文件到 MinIO
+     * @param rgb
+     * @param objectName
+     * @param geoFile
+     */
     private void uploadFileToMinIOAsync(BufferedImage rgb, String objectName, GeoFile geoFile) {
         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
             File tempFile = null;
@@ -326,7 +345,6 @@ public class OperationServiceImpl implements OperationService {
             }
         });
     }
-
 
     /**
      * 裁剪tiff文件

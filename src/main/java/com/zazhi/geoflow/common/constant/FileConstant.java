@@ -16,4 +16,6 @@ public class FileConstant {
     public static final String COMBINE_RGB_FILE_NAME = "combineRGB-" + UUID.randomUUID().toString();
 
     public static final String UPLOAD_TEMP_FILE_PREFIX = "geoflow-upload-";
+
+    public static final String NDVI_FILE_NAME = "ndvi-" + UUID.randomUUID().toString();
 }
