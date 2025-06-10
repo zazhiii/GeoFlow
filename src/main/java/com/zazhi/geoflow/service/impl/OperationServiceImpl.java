@@ -145,35 +145,42 @@ public class OperationServiceImpl implements OperationService {
         GeoFile redBandFile = geoFileUtil.checkFile(redBandId);
         GeoFile nirBandFile = geoFileUtil.checkFile(nirBandId);
 
-        RenderedImage redRenderedImg = imageUtil.getRenderedImg(minioProp.getBucketName(), redBandFile.getObjectName());
-        RenderedImage nirRenderedImg = imageUtil.getRenderedImg(minioProp.getBucketName(), nirBandFile.getObjectName());
-        Raster redRaster = redRenderedImg.getData();
-        Raster nirRaster = nirRenderedImg.getData();
+        String bucketName = minioProp.getBucketName();
+        BufferedImage ndviImage = null;
+        try (InputStream isRed = minioUtil.getObject(bucketName, redBandFile.getObjectName());
+             InputStream isNir = minioUtil.getObject(bucketName, nirBandFile.getObjectName())) {
+            GeoTiffReader redReader = new GeoTiffReader(isRed);
+            GeoTiffReader nirReader = new GeoTiffReader(isNir);
 
-        int width = redRenderedImg.getWidth();
-        int height = redRenderedImg.getHeight();
+            GridCoverage2D redGridCov = redReader.read(null);
+            GridCoverage2D nirGridCov = nirReader.read(null);
 
-        BufferedImage ndviImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            RenderedImage redRenderedImg = redGridCov.getRenderedImage();
+            RenderedImage nirRenderedImg = nirGridCov.getRenderedImage();;
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                double nir = nirRaster.getSampleDouble(x, y, 0);
-                double red = redRaster.getSampleDouble(x, y, 0);
+            Raster redRaster = redRenderedImg.getData();
+            Raster nirRaster = nirRenderedImg.getData();
 
-                double ndvi = (nir + red == 0) ? 0 : (nir - red) / (nir + red);
-                // 将NDVI值映射到颜色
-                Color color = getNDVIColor(ndvi);
-                ndviImage.setRGB(x, y, color.getRGB());
+            int width = redRenderedImg.getWidth();
+            int height = redRenderedImg.getHeight();
+
+            ndviImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    double nir = nirRaster.getSampleDouble(x, y, 0);
+                    double red = redRaster.getSampleDouble(x, y, 0);
+
+                    double ndvi = (nir + red == 0) ? 0 : (nir - red) / (nir + red);
+                    // 将NDVI值映射到颜色
+                    Color color = getNDVIColor(ndvi);
+                    ndviImage.setRGB(x, y, color.getRGB());
+                }
             }
+
+        } catch (Exception e) {
+            throw new RuntimeException("计算NDVI失败", e);
         }
-//        // 设置响应头
-//        response.setContentType("image/png");
-//        try {
-//            ImageIO.write(ndviImage, "png", response.getOutputStream());
-//            response.flushBuffer(); // 确保及时发送
-//        } catch (IOException e) {
-//            throw new RuntimeException("写出文件失败");
-//        }
 
         String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         String objectName = currentDate + "/" + UUID.randomUUID() + "." + ExtensionConstant.PNG;

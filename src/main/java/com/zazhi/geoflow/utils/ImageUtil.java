@@ -45,7 +45,13 @@ public class ImageUtil {
      * @return Raster
      */
     public Raster getRaster(String bucketName, String objectName) {
-        return getRenderedImg(bucketName, objectName).getData();
+        try (InputStream is = minioUtil.getObject(bucketName, objectName)) {
+            GeoTiffReader reader = new GeoTiffReader(is);
+            GridCoverage2D gridCoverage2D = reader.read(null);
+            return gridCoverage2D.getRenderedImage().getData();
+        } catch (Exception e) {
+            throw new RuntimeException("获取图片失败", e);
+        }
     }
 
 }
