@@ -4,11 +4,13 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.jwt.JWT;
 import com.zazhi.geoflow.config.properties.JWTProperties;
 import com.zazhi.geoflow.config.properties.MinioConfigProperties;
+import com.zazhi.geoflow.entity.dto.UserInfoUpdateDto;
 import com.zazhi.geoflow.entity.pojo.User;
 import com.zazhi.geoflow.mapper.UserMapper;
 import com.zazhi.geoflow.service.UserService;
 import com.zazhi.geoflow.utils.MinioUtil;
 import com.zazhi.geoflow.utils.ThreadLocalUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -100,7 +102,7 @@ public class UserServiceImpl implements UserService {
     public void uploadAvatar(MultipartFile file) {
         Integer userId = ThreadLocalUtil.getCurrentId();
         User user = userMapper.getUserById(userId);
-        if (user.getAvatar() != null) {
+        if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
             // 删除原头像
             String url = user.getAvatar();
             String fileName = url.substring(
@@ -110,6 +112,14 @@ public class UserServiceImpl implements UserService {
         // 上传新头像
         String url = minioUtil.upload(file);
         user.setAvatar(url);
+        userMapper.update(user);
+    }
+
+    @Override
+    public void update(UserInfoUpdateDto userInfo) {
+        User user = new User();
+        user.setId(ThreadLocalUtil.getCurrentId());
+        BeanUtils.copyProperties(userInfo, user);
         userMapper.update(user);
     }
 

@@ -6,10 +6,10 @@
     <update id="update" parameterType="com.zazhi.geoflow.entity.pojo.User">
         UPDATE user
         <set>
-            <if test="username != null">username = #{username},</if>
-            <if test="password != null">password = #{password},</if>
-            <if test="avatar != null">avatar = #{avatar},</if>
-            <if test="email != null">email = #{email},</if>
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="avatar != null and avatar != ''">avatar = #{avatar},</if>
+            <if test="email != null and avatar != ''">email = #{email}</if>
 <!--            <if test="phoneNumber != null">phone_number = #{phoneNumber},</if>-->
 <!--            <if test="lastLoginTime != null">last_login_time = #{last_login_time},</if>-->
         </set>

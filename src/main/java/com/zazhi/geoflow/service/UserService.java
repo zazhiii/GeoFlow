@@ -1,5 +1,6 @@
 package com.zazhi.geoflow.service;
 
+import com.zazhi.geoflow.entity.dto.UserInfoUpdateDto;
 import com.zazhi.geoflow.entity.pojo.User;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,4 +32,9 @@ public interface UserService {
      */
     void uploadAvatar(MultipartFile file);
 
+    /**
+     * 更新用户信息
+     * @param userInfo 用户信息更新对象
+     */
+    void update(UserInfoUpdateDto userInfo);
 }

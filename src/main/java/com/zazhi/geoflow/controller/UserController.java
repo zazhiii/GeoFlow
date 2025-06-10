@@ -1,5 +1,6 @@
 package com.zazhi.geoflow.controller;
 
+import com.zazhi.geoflow.entity.dto.UserInfoUpdateDto;
 import com.zazhi.geoflow.entity.pojo.Result;
 import com.zazhi.geoflow.entity.pojo.User;
 import com.zazhi.geoflow.service.UserService;
@@ -61,6 +62,14 @@ public class UserController {
     public Result uploadAvatar(@RequestParam("file") MultipartFile file) {
         log.info("上传头像");
         userService.uploadAvatar(file);
+        return Result.success();
+    }
+
+    @Operation(summary = "更新用户信息")
+    @PostMapping(value = "update")
+    public Result update(@RequestBody UserInfoUpdateDto userInfo) {
+        log.info("更新用户信息");
+        userService.update(userInfo);
         return Result.success();
     }
 
