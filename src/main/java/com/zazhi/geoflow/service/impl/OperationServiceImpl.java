@@ -363,7 +363,8 @@ public class OperationServiceImpl implements OperationService {
      * @param y2 裁剪范围右上角y坐标
      */
     @Override
-    public void cropTiff(Integer id, Integer x1, Integer y1, Integer x2, Integer y2) {
+    public void cropTiff(
+            Integer id, Integer x1, Integer y1, Integer x2, Integer y2) {
         GeoFile geoFile = geoFileUtil.checkFile(id);
         // TODO 文件类型校验
 
