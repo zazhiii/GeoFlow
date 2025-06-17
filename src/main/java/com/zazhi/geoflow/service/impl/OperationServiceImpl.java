@@ -401,7 +401,7 @@ public class OperationServiceImpl implements OperationService {
         }
         // 输出文件
         String fileName = geoFile.getFileName();
-        String target_file_name = fileName.substring(0, fileName.lastIndexOf('.') + 1) + "_crop.tif";
+        String target_file_name = fileName.substring(0, fileName.lastIndexOf('.')) + "_crop.tif";
         File cropFile = new File(cropDirectory, target_file_name);
         GeoTiffFormat format = (GeoTiffFormat) reader.getFormat();
         try {
@@ -424,6 +424,7 @@ public class OperationServiceImpl implements OperationService {
                 .fileName(target_file_name)
                 .objectName(objectName)
                 .url(url)
+                .status(FileStatus.UPLOADED.getCode())
                 .fileSize(cropFile.length())
                 .fileType(FileType.fromValue(extension))
                 .build();
