@@ -91,12 +91,12 @@ public class GeoFileController {
         return Result.success(minioUtil.preview(fileName));
     }
 
-    @Operation(summary = "文件下载")
-    @GetMapping("/download")
-    public Result download(@RequestParam("fileName") String fileName, HttpServletResponse res) {
-        minioUtil.download(fileName, res);
-        return Result.success();
-    }
+//    @Operation(summary = "文件下载")
+//    @GetMapping("/download")
+//    public Result download(@RequestParam("fileName") String fileName, HttpServletResponse res) {
+//        minioUtil.download(fileName, res);
+//        return Result.success();
+//    }
 
     @Operation(summary = "获取元数据")
     @GetMapping("/metadata/{id}")

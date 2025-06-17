@@ -7,7 +7,7 @@
         UPDATE user
         <set>
             <if test="username != null and username != ''">username = #{username},</if>
-            <if test="password != null and password != ''">password = #{password},</if>
+<!--            <if test="password != null and password != ''">password = #{password},</if>-->
             <if test="avatar != null and avatar != ''">avatar = #{avatar},</if>
             <if test="email != null and avatar != ''">email = #{email}</if>
 <!--            <if test="phoneNumber != null">phone_number = #{phoneNumber},</if>-->

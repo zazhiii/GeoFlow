@@ -3,6 +3,9 @@ package com.zazhi.geoflow.controller;
 import com.zazhi.geoflow.entity.pojo.Result;
 import com.zazhi.geoflow.service.OperationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,13 @@ public class OperationController {
     private final OperationService operationService;
 
     @Operation(summary = "裁剪tiff文件")
+    @Parameters({
+            @Parameter(name = "id", description = "文件ID", required = true, in = ParameterIn.QUERY),
+            @Parameter(name = "x1", description = "左下角X地理坐标", required = true, in = ParameterIn.QUERY),
+            @Parameter(name = "y1", description = "左下角Y地理坐标", required = true, in = ParameterIn.QUERY),
+            @Parameter(name = "x2", description = "右上角X地理坐标", required = true, in = ParameterIn.QUERY),
+            @Parameter(name = "y2", description = "右上角Y地理坐标", required = true, in = ParameterIn.QUERY)
+    })
     @PostMapping("/crop-tiff")
     public Result cropTiff(
             Integer id,

@@ -19,7 +19,6 @@ public interface OperationService {
      * @param redBondId
      * @param greenBondId
      * @param blueBondId
-     * @param response
      */
     void combineRGB(Integer redBondId, Integer greenBondId, Integer blueBondId, String stretchMode);
 
